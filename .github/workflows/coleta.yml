@@ -45,10 +45,14 @@ jobs:
           if [ -f docs/diagnostico.json ]; then
             node -e "
               const d=require('./docs/diagnostico.json');
-              console.log('| Fonte | OK | Detalhe |');
+              console.log('### Coleta de '+d.geradoEm);
+              console.log('');
+              console.log('| Fonte | Status | Detalhe |');
               console.log('|---|---|---|');
               for (const f of d.diagnostico) {
-                console.log('| '+(f.fonte||'')+' — '+(f.rotulo||'')+' | '+(f.ok?'✅':'❌')+' | '+(f.erro||f.indicadores||f.registros||f.series||'')+' |');
+                const s = f.experimental ? '⚠️ em avaliação' : (f.ok ? '✅' : '❌');
+                const det = f.erro || f.nota || f.indicadores || f.anosComDados || f.series || '';
+                console.log('| '+(f.fonte||'')+' — '+(f.rotulo||'')+' | '+s+' | '+String(det).slice(0,160)+' |');
               }
             " >> $GITHUB_STEP_SUMMARY
           fi
