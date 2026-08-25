@@ -164,7 +164,11 @@ globalThis.fetch = async (url, opts = {}) => {
     return jsonRes(pontos);
   }
 
-  if (u.includes('aneel')) return new Response('erro simulado ANEEL', { status: 503 });
+  if (u.includes('aneel')) {
+    if (u.includes('package_list'))
+      return jsonRes({ result: ['consumo-mensal-por-classe', 'indqual-inadimplencia', 'tarifas-homologadas'] });
+    return jsonRes({ result: { results: [{ title: 'Consumo mensal por classe', resources: [{ name: 'consumo.csv', format: 'CSV', datastore_active: true, id: 'abc' }] }] } });
+  }
   if (u.includes('mte')) return new Response('erro simulado CAGED', { status: 404 });
 
   return new Response('rota nao simulada: ' + u, { status: 500 });

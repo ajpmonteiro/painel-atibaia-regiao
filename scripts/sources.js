@@ -568,43 +568,63 @@ export async function coletarMacro(log) {
 /* ------------------------------------------------------------------ */
 
 /**
- * Consumo mensal de energia é um dos melhores termômetros de atividade econômica
- * local, mas o portal da ANEEL reorganiza os conjuntos com frequência e o nome do
- * recurso muda. Esta rodada apenas identifica e registra os candidatos: o
- * diagnóstico lista o que foi encontrado para que a extração seja fixada no
- * recurso certo. Marcada como experimental — não conta como falha do painel.
+ * Consumo mensal de energia é o melhor termômetro de atividade econômica local
+ * que falta ao painel, mas o portal da ANEEL reorganiza os conjuntos e muda os
+ * nomes dos recursos. Esta rodada é de reconhecimento: registra SEM FILTRAR o que
+ * o catálogo devolve, para que a extração seja fixada no recurso certo na próxima.
+ * (A versão anterior filtrava por título antes de registrar e, quando nada casava,
+ * descartava justamente a informação necessária para corrigir.)
  */
 export async function coletarAneel(municipios, log) {
-  const indicadores = {};
-  const candidatos = [];
-  const consultas = ['consumo+energia+municipio', 'consumo+mensal+classe', 'consumidores+consumo+receita'];
-  for (const q of consultas) {
+  const conjuntos = [];
+  const recursos = [];
+  const erros = [];
+  let totalConjuntos = null;
+
+  // 1) Catálogo completo: só os nomes, para saber o que existe.
+  try {
+    const j = await httpGet('https://dadosabertos.aneel.gov.br/api/3/action/package_list',
+      { timeout: 60000 });
+    const nomes = j?.result || [];
+    totalConjuntos = nomes.length;
+    const provaveis = nomes.filter((n) => /consum|energ|mercado|distribuid|tarif/i.test(n));
+    conjuntos.push(...(provaveis.length ? provaveis : nomes).slice(0, 60));
+  } catch (e) {
+    erros.push(`package_list: ${String(e.message || e).slice(0, 140)}`);
+  }
+  await sleep(600);
+
+  // 2) Busca por consumo: títulos e recursos, registrados como vierem.
+  for (const q of ['consumo', 'consumo+energia+municipio']) {
     try {
       const j = await httpGet(
         `https://dadosabertos.aneel.gov.br/api/3/action/package_search?q=${q}&rows=10`,
-        { timeout: 45000 }
+        { timeout: 60000 }
       );
       for (const p of j?.result?.results || []) {
-        const titulo = String(p.title || p.name || '');
-        if (!/consumo/i.test(titulo)) continue;
-        for (const r of p.resources || []) {
-          if (!r.datastore_active) continue;
-          candidatos.push({ pacote: titulo, recurso: r.name, id: r.id });
+        for (const r of (p.resources || []).slice(0, 4)) {
+          recursos.push({
+            pacote: String(p.title || p.name || '').slice(0, 90),
+            recurso: String(r.name || '').slice(0, 90),
+            formato: r.format, datastore: !!r.datastore_active, id: r.id,
+          });
         }
       }
     } catch (e) {
-      candidatos.push({ consulta: q, erro: String(e.message || e).slice(0, 120) });
+      erros.push(`package_search ${q}: ${String(e.message || e).slice(0, 140)}`);
     }
     await sleep(600);
   }
-  log?.(`ANEEL: ${candidatos.length} recursos candidatos identificados`);
+
+  log?.(`ANEEL: ${totalConjuntos ?? '?'} conjuntos no catálogo, ${recursos.length} recursos inspecionados`);
   return {
-    indicadores,
+    indicadores: {},
     diagnostico: [{
       fonte: 'ANEEL — Dados Abertos', rotulo: 'consumo de energia elétrica',
       ok: false, experimental: true,
-      nota: 'Fonte em avaliação: nenhum indicador extraído ainda.',
-      candidatos: candidatos.slice(0, 12),
+      nota: 'Rodada de reconhecimento: o catálogo abaixo é o que falta para fixar a extração.',
+      totalConjuntos, erros: erros.length ? erros : undefined,
+      conjuntos, recursos: recursos.slice(0, 30),
     }],
   };
 }
