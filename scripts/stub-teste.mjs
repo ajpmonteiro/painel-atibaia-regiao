@@ -137,9 +137,15 @@ globalThis.fetch = async (url, opts = {}) => {
   if (u.includes('api-comexstat')) {
     if (u.includes('dates/updated')) return jsonRes({ data: { updated: '2026-08-06', year: '2026', monthNumber: '07' }, success: true });
     const corpo = JSON.parse(opts.body || '{}');
-    const de = String(corpo?.period?.from || '2020-01');
-    const list = MUNS.map(([cod]) => ({ coMun: String(cod), metricFOB: String(Math.round(1e7 * (1 + rnd() * 20))) }));
-    if (de === '2019-01') return new Response(JSON.stringify({ error: { code: 429, message: 'limite' } }), { status: 429 });
+    const de = Number(String(corpo?.period?.from || '2019-01').slice(0, 4));
+    const ate = Number(String(corpo?.period?.to || '2025-12').slice(0, 4));
+    const list = [];
+    for (let ano = de; ano <= ate; ano++) {
+      for (const [, nome] of MUNS)
+        list.push({ noMunMinsgUf: `${nome} - SP`, year: String(ano), state: 'SP', metricFOB: String(Math.round(1e7 * (1 + rnd() * 20))) });
+      list.push({ noMunMinsgUf: 'Sorocaba - SP', year: String(ano), state: 'SP', metricFOB: '999' });
+      list.push({ noMunMinsgUf: 'Atibaia - MG', year: String(ano), state: 'MG', metricFOB: '111' });
+    }
     return jsonRes({ data: { list }, success: true });
   }
 

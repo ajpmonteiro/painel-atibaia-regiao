@@ -360,26 +360,30 @@ export async function coletarSiconfi(municipios, log) {
 const COMEX = 'https://api-comexstat.mdic.gov.br';
 
 /**
- * O endpoint /cities não aceita "year" em `details` (devolve 400 "Invalid detail
- * item") e limita a frequência de chamadas (429 pedindo 10 s de espera). Por isso
- * a série anual é montada com uma consulta por ano, espaçadas.
+ * Aprendido com a resposta real da API: o endpoint /cities identifica o município
+ * pelo NOME com a sigla da UF (campo `noMunMinsgUf`, ex.: "Atibaia - SP"), não por
+ * código — daí o filtro numérico por `city` não casar com nada. Também não aceita
+ * "year" em `details` (400 "Invalid detail item"), mas devolve o ano assim mesmo
+ * quando `monthDetail` é falso. E limita a frequência de chamadas (429).
+ * Por isso: uma consulta por fluxo cobrindo todos os anos, sem filtro, casando os
+ * nomes localmente.
  */
 let ultimaChamadaComex = 0;
 async function comexCities(corpo) {
   const espera = 4000 - (Date.now() - ultimaChamadaComex);
   if (espera > 0) await sleep(espera);
   ultimaChamadaComex = Date.now();
-  try {
-    const j = await httpPost(`${COMEX}/cities`, corpo, { timeout: 90000 });
+  const pedir = async () => {
+    const j = await httpPost(`${COMEX}/cities`, corpo, { timeout: 120000 });
     return j?.data?.list || (Array.isArray(j?.data) ? j.data : []) || [];
+  };
+  try {
+    return await pedir();
   } catch (e) {
-    if (/HTTP 429/.test(e.message)) {
-      await sleep(15000);
-      ultimaChamadaComex = Date.now();
-      const j = await httpPost(`${COMEX}/cities`, corpo, { timeout: 90000 });
-      return j?.data?.list || (Array.isArray(j?.data) ? j.data : []) || [];
-    }
-    throw e;
+    if (!/HTTP 429/.test(e.message)) throw e;
+    await sleep(15000);
+    ultimaChamadaComex = Date.now();
+    return pedir();
   }
 }
 
@@ -397,96 +401,81 @@ export async function coletarComex(municipios, log) {
     ultimoMes = 12;
   }
 
+  // Um ano em curso pareceria uma queda: a série anual só usa anos fechados.
   const anoFim = ultimoMes >= 12 ? ultimoAno : ultimoAno - 1;
   const anoIni = anoFim - 7;
-  const codigosAlvo = municipios.map((m) => Number(m.codigo));
 
-  // O código de município do Comex Stat pode vir com ou sem dígito verificador,
-  // como número ou texto: a comparação usa os seis primeiros dígitos.
-  const chave = (v) => String(v ?? '').replace(/\D/g, '').slice(0, 6);
-  const porChave = new Map(municipios.map((m) => [m.codigo.slice(0, 6), m]));
-  const casar = (linha) => {
-    for (const campo of ['coMun', 'city', 'coMunicipio', 'municipality', 'coMunGeo', 'id'])
-      if (linha[campo] !== undefined) {
-        const m = porChave.get(chave(linha[campo]));
-        if (m) return m;
-      }
-    return null;
+  const porNome = new Map(municipios.map((m) => [norm(m.nome), m]));
+  const naoCasados = new Set();
+  /** "Atibaia - SP" -> município do recorte (a UF evita homônimos de outros estados). */
+  const casar = (r) => {
+    const bruto = String(r.noMunMinsgUf ?? r.noMun ?? r.city ?? r.coMun ?? '');
+    const m = /^(.*?)\s*-\s*([A-Za-z]{2})\s*$/.exec(bruto);
+    if (!m) return null;
+    if (m[2].toUpperCase() !== 'SP') return null;
+    const achado = porNome.get(norm(m[1]));
+    if (!achado && naoCasados.size < 25) naoCasados.add(bruto);
+    return achado || null;
   };
-  const fobDe = (r) => num(r.metricFOB ?? r.vlFob ?? r.fob ?? r.metricfob ?? r.value);
+  const fobDe = (r) => num(r.metricFOB ?? r.vlFob ?? r.fob);
 
-  const corpo = (fluxo, de, ate, comFiltro) => ({
+  const corpo = (fluxo, de, ate) => ({
     flow: fluxo,
     monthDetail: false,
     period: { from: de, to: ate },
-    filters: comFiltro ? [{ filter: 'city', values: codigosAlvo }] : [],
+    filters: [],
     details: ['state', 'city'],
     metrics: ['metricFOB'],
   });
 
-  /** Tenta com filtro de município; se nada casar, refaz sem filtro e casa localmente. */
-  async function buscar(fluxo, de, ate, estado) {
-    for (const comFiltro of estado.semFiltro ? [false] : [true, false]) {
-      const lista = await comexCities(corpo(fluxo, de, ate, comFiltro));
-      const casados = lista.map((r) => ({ r, m: casar(r) })).filter((x) => x.m);
-      estado.ultimaAmostra = lista[0] ? Object.keys(lista[0]) : [];
-      estado.ultimasLinhas = lista.length;
-      if (casados.length) {
-        if (!comFiltro) estado.semFiltro = true; // as próximas já vão direto
-        return casados;
-      }
-    }
-    return [];
-  }
-
   for (const fluxo of ['export', 'import']) {
     const ehExp = fluxo === 'export';
-    const estado = { semFiltro: false, ultimaAmostra: [], ultimasLinhas: 0 };
-    const id = ehExp ? 'comex_export_fob' : 'comex_import_fob';
-    const ind = {
-      id, rotulo: ehExp ? 'Exportações (US$ FOB)' : 'Importações (US$ FOB)',
-      unidade: 'US$ FOB', grupo: 'Comércio exterior',
-      fonte: 'MDIC — Comex Stat (município de domicílio fiscal da empresa)',
-      fonteUrl: 'https://comexstat.mdic.gov.br/pt/municipio',
-      nota: `Somente anos fechados. Base atualizada em ${atualizado || 's/d'}.`,
-      periodos: [], valores: {},
-    };
-    let anosOk = 0, ultimoErro = null;
 
-    for (let ano = anoIni; ano <= anoFim; ano++) {
-      try {
-        const casados = await buscar(fluxo, `${ano}-01`, `${ano}-12`, estado);
-        let entrou = 0;
-        for (const { r, m } of casados) {
-          const fob = fobDe(r);
-          if (fob === null) continue;
-          ind.valores[m.codigo] = ind.valores[m.codigo] || {};
-          ind.valores[m.codigo][String(ano)] = (ind.valores[m.codigo][String(ano)] || 0) + fob;
-          entrou++;
-        }
-        if (entrou) { ind.periodos.push(String(ano)); anosOk++; }
-      } catch (e) {
-        ultimoErro = String(e.message || e).slice(0, 220);
+    /* --- série anual --- */
+    try {
+      const lista = await comexCities(corpo(fluxo, `${anoIni}-01`, `${anoFim}-12`));
+      const id = ehExp ? 'comex_export_fob' : 'comex_import_fob';
+      const ind = {
+        id, rotulo: ehExp ? 'Exportações (US$ FOB)' : 'Importações (US$ FOB)',
+        unidade: 'US$ FOB', grupo: 'Comércio exterior',
+        fonte: 'MDIC — Comex Stat (município de domicílio fiscal da empresa)',
+        fonteUrl: 'https://comexstat.mdic.gov.br/pt/municipio',
+        nota: `Somente anos fechados. Base atualizada em ${atualizado || 's/d'}.`,
+        periodos: [], valores: {},
+      };
+      let casados = 0;
+      for (const r of lista) {
+        const m = casar(r);
+        const ano = String(r.year ?? r.coAno ?? '');
+        const fob = fobDe(r);
+        if (!m || !/^\d{4}$/.test(ano) || fob === null || Number(ano) > anoFim) continue;
+        ind.valores[m.codigo] = ind.valores[m.codigo] || {};
+        ind.valores[m.codigo][ano] = (ind.valores[m.codigo][ano] || 0) + fob;
+        if (!ind.periodos.includes(ano)) ind.periodos.push(ano);
+        casados++;
       }
+      ind.periodos.sort();
+      if (ind.periodos.length) indicadores[id] = ind;
+      diagnostico.push({
+        fonte: 'Comex Stat', rotulo: `${fluxo} — série anual`,
+        ok: ind.periodos.length > 0, periodo: `${anoIni}–${anoFim}`, atualizado,
+        linhasRecebidas: lista.length, linhasCasadas: casados,
+        camposRecebidos: lista[0] ? Object.keys(lista[0]) : [],
+        exemploNaoCasado: ind.periodos.length ? undefined : [...naoCasados].slice(0, 8),
+      });
+      log?.(`Comex ${fluxo} anual: ${casados} linhas casadas de ${lista.length}, anos ${ind.periodos.join(',')}`);
+    } catch (e) {
+      diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} — série anual`,
+        ok: false, erro: String(e.message || e).slice(0, 220) });
+      log?.(`Comex ${fluxo} anual FALHOU: ${e.message}`);
     }
-    ind.periodos.sort();
-    if (ind.periodos.length) indicadores[id] = ind;
-    diagnostico.push({
-      fonte: 'Comex Stat', rotulo: `${fluxo} — série anual`,
-      ok: anosOk > 0, anosComDados: anosOk, periodo: `${anoIni}–${anoFim}`, atualizado,
-      semFiltroDeMunicipio: estado.semFiltro,
-      linhasNaUltimaConsulta: estado.ultimasLinhas,
-      camposRecebidos: estado.ultimaAmostra,
-      erro: anosOk ? undefined : (ultimoErro || 'a API respondeu, mas nenhuma linha casou com os municípios'),
-    });
-    log?.(`Comex ${fluxo}: ${anosOk} anos com dados (campos vistos: ${estado.ultimaAmostra.join(', ') || 'nenhum'})`);
 
     /* --- acumulado dos últimos 12 meses --- */
     try {
       const de = new Date(Date.UTC(ultimoAno, ultimoMes - 12, 1));
       const desde = `${de.getUTCFullYear()}-${String(de.getUTCMonth() + 1).padStart(2, '0')}`;
       const ate = `${ultimoAno}-${String(ultimoMes).padStart(2, '0')}`;
-      const casados = await buscar(fluxo, desde, ate, estado);
+      const lista = await comexCities(corpo(fluxo, desde, ate));
       const id12 = ehExp ? 'comex_export_12m' : 'comex_import_12m';
       const ind12 = {
         id: id12,
@@ -496,15 +485,17 @@ export async function coletarComex(municipios, log) {
         fonteUrl: 'https://comexstat.mdic.gov.br/pt/municipio',
         nota: `Soma de ${desde} a ${ate}.`, periodos: [ate], valores: {},
       };
-      for (const { r, m } of casados) {
+      for (const r of lista) {
+        const m = casar(r);
         const fob = fobDe(r);
-        if (fob === null) continue;
+        if (!m || fob === null) continue;
         ind12.valores[m.codigo] = ind12.valores[m.codigo] || {};
         ind12.valores[m.codigo][ate] = (ind12.valores[m.codigo][ate] || 0) + fob;
       }
       if (Object.keys(ind12.valores).length) indicadores[id12] = ind12;
       diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} — acumulado 12 meses`,
-        ok: Object.keys(ind12.valores).length > 0, janela: `${desde}–${ate}` });
+        ok: Object.keys(ind12.valores).length > 0, janela: `${desde}–${ate}`,
+        linhasRecebidas: lista.length });
     } catch (e) {
       diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} — acumulado 12 meses`,
         ok: false, erro: String(e.message || e).slice(0, 220) });
