@@ -19,8 +19,11 @@ const miolo = html
   .trim();
 const estilo = html.match(/<style>[\s\S]*?<\/style>/)[0];
 const titulo = (html.match(/<title>([\s\S]*?)<\/title>/) || [, 'Painel'])[1];
+// As fontes ficam no <head>, que não entra no miolo: carregamos junto.
+const fontes = (html.match(/<link[^>]+fonts\.(googleapis|gstatic)\.com[^>]*>/g) || []).join('\n');
 
 const saida = `<title>${titulo}</title>
+${fontes}
 ${estilo}
 ${miolo.replace(/<script src="app\.js"[^>]*><\/script>/, '')}
 <script>window.DADOS = ${dados};</script>

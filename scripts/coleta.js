@@ -113,7 +113,8 @@ function fontesUsadas(indicadores, macro) {
 
 /* ---------------- indicadores derivados ---------------- */
 
-function derivados(municipios, ind) {
+// Exportada para permitir recalcular os derivados sobre uma base já coletada.
+export function derivados(municipios, ind) {
   const out = {};
   const cods = municipios.map((m) => m.codigo);
   const acha = (re) => Object.values(ind).find((i) => re.test(i.rotulo || ''));
@@ -155,6 +156,14 @@ function derivados(municipios, ind) {
         grupo: 'Estrutura econômica', fonte: 'IBGE — PIB dos Municípios (cálculo próprio)',
         fonteUrl: 'https://sidra.ibge.gov.br/tabela/5938',
       }, src, vaTotal, 100);
+
+  // A tabela 5938 do SIDRA não publica PIB per capita: calculamos.
+  // O PIB vem em mil reais, daí o fator 1000.
+  razao('der_pib_pc', {
+    rotulo: 'PIB por habitante', unidade: 'Reais', grupo: 'Economia',
+    fonte: 'IBGE — PIB dos Municípios e Estimativas (cálculo próprio)',
+    fonteUrl: 'https://sidra.ibge.gov.br/tabela/5938',
+  }, pib, pop, 1000);
 
   razao('der_receita_pc', {
     rotulo: 'Receita municipal por habitante', unidade: 'R$/hab', grupo: 'Finanças públicas',
@@ -244,7 +253,10 @@ function derivados(municipios, ind) {
   return out;
 }
 
-principal().catch((e) => {
-  console.error('Falha geral na coleta:', e);
-  process.exit(1);
-});
+// Só executa a coleta quando chamado direto (permite importar as funções em testes).
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+  principal().catch((e) => {
+    console.error('Falha geral na coleta:', e);
+    process.exit(1);
+  });
+}
