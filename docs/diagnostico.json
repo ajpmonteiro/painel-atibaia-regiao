@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-08-25T21:31:39.317Z",
+  "geradoEm": "2026-08-25T21:42:27.008Z",
   "diagnostico": [
     {
       "fonte": "IBGE 6579",
@@ -12,7 +12,7 @@
         "inicio": 2001,
         "fim": 2025
       },
-      "ms": 285
+      "ms": 370
     },
     {
       "fonte": "IBGE 4714",
@@ -25,7 +25,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 812
+      "ms": 356
     },
     {
       "fonte": "IBGE 5938",
@@ -38,7 +38,7 @@
         "inicio": 2002,
         "fim": 2023
       },
-      "ms": 4895
+      "ms": 358
     },
     {
       "fonte": "IBGE 1685",
@@ -51,7 +51,7 @@
         "inicio": 2006,
         "fim": 2021
       },
-      "ms": 3420
+      "ms": 357
     },
     {
       "fonte": "IBGE 5457",
@@ -64,7 +64,7 @@
         "inicio": 1974,
         "fim": 2024
       },
-      "ms": 296
+      "ms": 379
     },
     {
       "fonte": "IBGE 4709",
@@ -77,7 +77,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 353
+      "ms": 351
     },
     {
       "fonte": "IBGE 6804",
@@ -90,7 +90,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 285,
+      "ms": 353,
       "classificacaoUsada": "Principal forma de abastecimento de água",
       "categoriasVistas": [
         "Total",
@@ -102,6 +102,9 @@
         "Água da chuva armazenada",
         "Rios, açudes, córregos, lagos e igarapés",
         "Outra"
+      ],
+      "categoriasSomadas": [
+        "Rede geral de distribuição"
       ]
     },
     {
@@ -115,7 +118,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 266,
+      "ms": 357,
       "classificacaoUsada": "Tipo de esgotamento sanitário",
       "categoriasVistas": [
         "Total",
@@ -128,6 +131,9 @@
         "Rio, lago, córrego ou mar",
         "Outra forma",
         "Não tinham banheiro nem sanitário"
+      ],
+      "categoriasSomadas": [
+        "Rede geral, rede pluvial ou fossa ligada à rede"
       ]
     },
     {
@@ -141,7 +147,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 267,
+      "ms": 349,
       "classificacaoUsada": "Destino do lixo",
       "categoriasVistas": [
         "Total",
@@ -152,6 +158,9 @@
         "Enterrado na propriedade",
         "Jogado em terreno baldio, encosta ou área pública",
         "Outro destino"
+      ],
+      "categoriasSomadas": [
+        "Coletado"
       ]
     },
     {
@@ -165,7 +174,7 @@
         "inicio": 2003,
         "fim": 2024
       },
-      "ms": 297
+      "ms": 358
     },
     {
       "fonte": "Tesouro Nacional / SICONFI",
@@ -242,20 +251,20 @@
     }
   ],
   "registro": [
-    "21:31:10 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
-    "21:31:10 IBGE 6579 (Estimativas da População): 1 indicadores",
-    "21:31:11 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
-    "21:31:12 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "21:31:14 BCB: 5 séries",
-    "21:31:17 IBGE 5938 (PIB dos Municípios): 7 indicadores",
-    "21:31:20 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "21:31:20 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
-    "21:31:21 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
-    "21:31:21 IBGE 5457 (Produção Agrícola Municipal): 4 indicadores",
-    "21:31:22 IBGE 4709 (Censo 2022 — variação e taxa de crescimento): 3 indicadores",
-    "21:31:23 IBGE 6804 (Censo 2022 — abastecimento de água): 2 indicadores",
-    "21:31:23 IBGE 6805 (Censo 2022 — esgotamento sanitário): 2 indicadores",
-    "21:31:24 IBGE 6892 (Censo 2022 — destino do lixo): 2 indicadores",
-    "21:31:25 IBGE 2612 (Nascidos vivos — Registro Civil): 1 indicadores"
+    "21:41:57 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
+    "21:41:57 IBGE 6579 (Estimativas da População): 1 indicadores",
+    "21:41:58 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
+    "21:41:59 IBGE 5938 (PIB dos Municípios): 7 indicadores",
+    "21:42:00 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
+    "21:42:00 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
+    "21:42:00 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "21:42:00 IBGE 5457 (Produção Agrícola Municipal): 4 indicadores",
+    "21:42:01 IBGE 4709 (Censo 2022 — variação e taxa de crescimento): 3 indicadores",
+    "21:42:02 IBGE 6804 (Censo 2022 — abastecimento de água): 2 indicadores",
+    "21:42:03 IBGE 6805 (Censo 2022 — esgotamento sanitário): 2 indicadores",
+    "21:42:03 IBGE 6892 (Censo 2022 — destino do lixo): 2 indicadores",
+    "21:42:04 IBGE 2612 (Nascidos vivos — Registro Civil): 1 indicadores",
+    "21:42:08 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "21:42:24 BCB: 5 séries"
   ]
 }
