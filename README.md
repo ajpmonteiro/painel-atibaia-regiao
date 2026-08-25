@@ -25,13 +25,28 @@ Nenhum servidor para manter, nenhum custo: o motor roda dentro do GitHub Actions
 |---|---|---|
 | **IBGE — API de Agregados (SIDRA)** | população estimada, Censo 2022, PIB municipal e valor adicionado por setor, Cadastro Central de Empresas, produção agrícola e pecuária, registro civil | anual |
 | **Tesouro Nacional — SICONFI/DCA** | receitas e despesas de cada prefeitura, despesa por função (educação, saúde, urbanismo…) | anual |
-| **MDIC — Comex Stat** | exportações e importações por município da empresa | mensal |
+| **MDIC — Comex Stat** | exportações e importações por município da empresa | anual¹ |
 | **Banco Central — SGS** | IPCA, Selic, IBC-Br, câmbio, desocupação (contexto nacional) | mensal |
 | **ANEEL — Dados Abertos** | consumo de energia elétrica por município (em consolidação) | mensal |
 
-Indicadores derivados (per capita, participação setorial, dependência de transferências,
-autonomia tributária, saldo comercial) são calculados na coleta e identificados como
-“cálculo próprio”.
+¹ O recorte municipal do Comex Stat só é publicado por ano fechado. Janelas parciais e
+`monthDetail: true` devolvem lista vazia — por isso a série usa apenas anos completos.
+A API identifica o município pelo **nome com a sigla da UF** (`"Atibaia - SP"`), não por
+código do IBGE; o casamento é feito por nome, exigindo `SP` para evitar homônimos.
+
+Indicadores derivados (PIB por habitante, per capita de receita e despesa, participação
+setorial, dependência de transferências, autonomia tributária, saldo comercial) são
+calculados na coleta e identificados como “cálculo próprio”. O PIB por habitante é
+calculado porque a tabela 5938 do SIDRA não publica essa variável.
+
+### Armadilhas já encontradas nestas fontes
+
+| Sintoma | Causa |
+|---|---|
+| Densidade de 33.154 hab/km² | O IBGE usa ponto decimal (`331.54`); tratar como separador de milhar destrói o valor |
+| `HTTP 400` no Banco Central | O endpoint `/ultimos/N` do SGS recusa N > 20; usar janela por datas |
+| Comex responde mas nada casa | O município vem por nome, não por código |
+| Workflow verde sem gravar dados | `git add` aborta inteiro se um dos caminhos não existir |
 
 ## Estrutura
 
