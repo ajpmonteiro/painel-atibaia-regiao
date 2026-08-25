@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-08-25T19:06:45.441Z",
+  "geradoEm": "2026-08-25T21:31:39.317Z",
   "diagnostico": [
     {
       "fonte": "IBGE 6579",
@@ -12,7 +12,7 @@
         "inicio": 2001,
         "fim": 2025
       },
-      "ms": 333
+      "ms": 285
     },
     {
       "fonte": "IBGE 4714",
@@ -25,7 +25,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 315
+      "ms": 812
     },
     {
       "fonte": "IBGE 5938",
@@ -38,7 +38,7 @@
         "inicio": 2002,
         "fim": 2023
       },
-      "ms": 317
+      "ms": 4895
     },
     {
       "fonte": "IBGE 1685",
@@ -51,7 +51,7 @@
         "inicio": 2006,
         "fim": 2021
       },
-      "ms": 317
+      "ms": 3420
     },
     {
       "fonte": "IBGE 5457",
@@ -64,7 +64,95 @@
         "inicio": 1974,
         "fim": 2024
       },
-      "ms": 337
+      "ms": 296
+    },
+    {
+      "fonte": "IBGE 4709",
+      "rotulo": "Censo 2022 — variação e taxa de crescimento",
+      "ok": true,
+      "indicadores": 3,
+      "nomeTabela": "População residente, Variação absoluta de população residente e Taxa de crescimento geométrico",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2022,
+        "fim": 2022
+      },
+      "ms": 353
+    },
+    {
+      "fonte": "IBGE 6804",
+      "rotulo": "Censo 2022 — abastecimento de água",
+      "ok": true,
+      "indicadores": 2,
+      "nomeTabela": "Domicílios particulares permanentes ocupados, por existência de canalização de água e principal forma de abastecimento de água",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2022,
+        "fim": 2022
+      },
+      "ms": 285,
+      "classificacaoUsada": "Principal forma de abastecimento de água",
+      "categoriasVistas": [
+        "Total",
+        "Rede geral de distribuição",
+        "Poço profundo ou artesiano",
+        "Poço raso, freático ou cacimba",
+        "Fonte, nascente ou mina",
+        "Carro-pipa",
+        "Água da chuva armazenada",
+        "Rios, açudes, córregos, lagos e igarapés",
+        "Outra"
+      ]
+    },
+    {
+      "fonte": "IBGE 6805",
+      "rotulo": "Censo 2022 — esgotamento sanitário",
+      "ok": true,
+      "indicadores": 2,
+      "nomeTabela": "Domicílios particulares permanentes ocupados, por tipo de esgotamento sanitário",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2022,
+        "fim": 2022
+      },
+      "ms": 266,
+      "classificacaoUsada": "Tipo de esgotamento sanitário",
+      "categoriasVistas": [
+        "Total",
+        "Rede geral, rede pluvial ou fossa ligada à rede",
+        "Rede geral ou pluvial",
+        "Fossa séptica ou fossa filtro ligada à rede",
+        "Fossa séptica ou fossa filtro não ligada à rede",
+        "Fossa rudimentar ou buraco",
+        "Vala",
+        "Rio, lago, córrego ou mar",
+        "Outra forma",
+        "Não tinham banheiro nem sanitário"
+      ]
+    },
+    {
+      "fonte": "IBGE 6892",
+      "rotulo": "Censo 2022 — destino do lixo",
+      "ok": true,
+      "indicadores": 2,
+      "nomeTabela": "Domicílios particulares permanentes ocupados, por destino do lixo",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2022,
+        "fim": 2022
+      },
+      "ms": 267,
+      "classificacaoUsada": "Destino do lixo",
+      "categoriasVistas": [
+        "Total",
+        "Coletado",
+        "Coletado no domicílio por serviço de limpeza",
+        "Depositado em caçamba de serviço de limpeza",
+        "Queimado na propriedade",
+        "Enterrado na propriedade",
+        "Jogado em terreno baldio, encosta ou área pública",
+        "Outro destino"
+      ]
     },
     {
       "fonte": "IBGE 2612",
@@ -77,7 +165,7 @@
         "inicio": 2003,
         "fim": 2024
       },
-      "ms": 321
+      "ms": 297
     },
     {
       "fonte": "Tesouro Nacional / SICONFI",
@@ -105,7 +193,7 @@
       "rotulo": "export — série anual",
       "ok": true,
       "periodo": "2018–2025",
-      "atualizado": null,
+      "atualizado": "2026-08-06",
       "linhasRecebidas": 18785,
       "linhasCasadas": 64,
       "camposRecebidos": [
@@ -117,10 +205,18 @@
     },
     {
       "fonte": "Comex Stat",
+      "rotulo": "export — acumulado do ano corrente",
+      "ok": true,
+      "experimental": false,
+      "janela": "2026-01–2026-07",
+      "linhasRecebidas": 2379
+    },
+    {
+      "fonte": "Comex Stat",
       "rotulo": "import — série anual",
       "ok": true,
       "periodo": "2018–2025",
-      "atualizado": null,
+      "atualizado": "2026-08-06",
       "linhasRecebidas": 17905,
       "linhasCasadas": 64,
       "camposRecebidos": [
@@ -131,262 +227,35 @@
       ]
     },
     {
+      "fonte": "Comex Stat",
+      "rotulo": "import — acumulado do ano corrente",
+      "ok": true,
+      "experimental": false,
+      "janela": "2026-01–2026-07",
+      "linhasRecebidas": 2334
+    },
+    {
       "fonte": "Banco Central — SGS",
       "rotulo": "contexto macroeconômico",
       "ok": true,
       "series": 5
-    },
-    {
-      "fonte": "ANEEL — Dados Abertos",
-      "rotulo": "consumo de energia elétrica",
-      "ok": false,
-      "experimental": true,
-      "nota": "Rodada de reconhecimento: o catálogo abaixo é o que falta para fixar a extração.",
-      "totalConjuntos": 72,
-      "conjuntos": [
-        "agentes-de-geracao-de-energia-eletrica",
-        "atendimento-mmgd-mini-e-micro-geracao-distribuida",
-        "bandeiras-tarifarias",
-        "base-de-dados-geografica-da-distribuidora-bdgd",
-        "componentes-tarifarias",
-        "conta-desenvolvimento-energetico-cde-custeio-dos-beneficios-tarifarios",
-        "indice-aneel-de-satisfacao-do-consumidor-iasc",
-        "interrupcoes-de-energia-eletrica-nas-redes-de-distribuicao",
-        "manifestacoes-no-1o-e-2o-niveis-da-distribuidora",
-        "projetos-de-eficiencia-energetica",
-        "projetos-de-p-d-em-energia-eletrica",
-        "ralie-relatorio-de-acompanhamento-da-expansao-da-oferta-de-geracao-de-energia-eletrica",
-        "relacao-de-empreendimentos-de-geracao-distribuida",
-        "subsidios-tarifarios",
-        "tarifas-distribuidoras-energia-eletrica",
-        "tarifa-social-de-energia-eletrica-beneficiarios"
-      ],
-      "recursos": [
-        {
-          "pacote": "SAMP - Sistema de Acompanhamento de Informações de Mercado para Regulação Econômica",
-          "recurso": "Dicionário de dados",
-          "formato": "PDF",
-          "datastore": false,
-          "id": "7dbb8074-9168-4e11-9380-1aab3c9ebba3"
-        },
-        {
-          "pacote": "SAMP - Sistema de Acompanhamento de Informações de Mercado para Regulação Econômica",
-          "recurso": "samp-2003.csv",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "349ca6b0-8e1b-4e1e-991d-b3d9edf6e368"
-        },
-        {
-          "pacote": "SAMP - Sistema de Acompanhamento de Informações de Mercado para Regulação Econômica",
-          "recurso": "samp-2003.parquet",
-          "formato": "PARQUET",
-          "datastore": false,
-          "id": "ef08fb35-7a0d-445b-b916-d7a09eaeab7f"
-        },
-        {
-          "pacote": "SAMP - Sistema de Acompanhamento de Informações de Mercado para Regulação Econômica",
-          "recurso": "samp-2004.csv",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "620bd3ee-7ad4-4e23-ae64-251e22a58303"
-        },
-        {
-          "pacote": "Bandeiras Tarifárias",
-          "recurso": "Dicionário de dados - Adicional",
-          "formato": "PDF",
-          "datastore": false,
-          "id": "1769e263-eb42-4f2e-b68f-e20c2250e6e5"
-        },
-        {
-          "pacote": "Bandeiras Tarifárias",
-          "recurso": "Bandeira Tarifária - Adicional",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "5879ca80-b3bd-45b1-a135-d9b77c1d5b36"
-        },
-        {
-          "pacote": "Bandeiras Tarifárias",
-          "recurso": "Dicionário de dados - Acionamento",
-          "formato": "PDF",
-          "datastore": false,
-          "id": "f6babd6e-c21f-4854-8288-d83ba4a08f1d"
-        },
-        {
-          "pacote": "Bandeiras Tarifárias",
-          "recurso": "Bandeira Tarifária - Acionamento",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "0591b8f6-fe54-437b-b72b-1aa2efd46e42"
-        },
-        {
-          "pacote": "Indqual Inadimplência",
-          "recurso": "Dicionário de dados",
-          "formato": "PDF",
-          "datastore": false,
-          "id": "8e8bc01c-bcfa-4be0-88cd-98c77936aa2e"
-        },
-        {
-          "pacote": "Indqual Inadimplência",
-          "recurso": "inadimplencia",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "0bb73b5d-b2e1-417d-9873-6de6b2d397d1"
-        },
-        {
-          "pacote": "Indqual Inadimplência",
-          "recurso": "dominio-indicadores",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "11f8d9bd-6d99-4d69-8edb-45c058da746f"
-        },
-        {
-          "pacote": "Atendimento a pedidos de conexões MMGD - Mini e Microgeração distribuída - pós Lei 14300",
-          "recurso": "Dicionário de dados",
-          "formato": "PDF",
-          "datastore": false,
-          "id": "bf062c12-4291-45e2-8595-a4823f22fd98"
-        },
-        {
-          "pacote": "Atendimento a pedidos de conexões MMGD - Mini e Microgeração distribuída - pós Lei 14300",
-          "recurso": "pedidos-de-conexão-mmgd-regiao-centro-oeste.zip",
-          "formato": "ZIP",
-          "datastore": false,
-          "id": "485b47f2-7929-4bff-bdde-0414f73bc266"
-        },
-        {
-          "pacote": "Atendimento a pedidos de conexões MMGD - Mini e Microgeração distribuída - pós Lei 14300",
-          "recurso": "pedidos-de-conexao-mmgd-regiao-centro-oeste.parquet",
-          "formato": "PARQUET",
-          "datastore": false,
-          "id": "6afefff3-134c-48cc-add8-39c5a278628b"
-        },
-        {
-          "pacote": "Atendimento a pedidos de conexões MMGD - Mini e Microgeração distribuída - pós Lei 14300",
-          "recurso": "pedidos-de-conexão-mmgd-regiao-nordeste.zip",
-          "formato": "ZIP",
-          "datastore": false,
-          "id": "c0f86267-a2e2-4840-8c65-91dd2f9147d7"
-        },
-        {
-          "pacote": "SAMP - Sistema de Acompanhamento de Informações de Mercado para Regulação Econômica",
-          "recurso": "Dicionário de dados",
-          "formato": "PDF",
-          "datastore": false,
-          "id": "7dbb8074-9168-4e11-9380-1aab3c9ebba3"
-        },
-        {
-          "pacote": "SAMP - Sistema de Acompanhamento de Informações de Mercado para Regulação Econômica",
-          "recurso": "samp-2003.csv",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "349ca6b0-8e1b-4e1e-991d-b3d9edf6e368"
-        },
-        {
-          "pacote": "SAMP - Sistema de Acompanhamento de Informações de Mercado para Regulação Econômica",
-          "recurso": "samp-2003.parquet",
-          "formato": "PARQUET",
-          "datastore": false,
-          "id": "ef08fb35-7a0d-445b-b916-d7a09eaeab7f"
-        },
-        {
-          "pacote": "SAMP - Sistema de Acompanhamento de Informações de Mercado para Regulação Econômica",
-          "recurso": "samp-2004.csv",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "620bd3ee-7ad4-4e23-ae64-251e22a58303"
-        },
-        {
-          "pacote": "IndQual Município",
-          "recurso": "Dicionário de dados",
-          "formato": "PDF",
-          "datastore": false,
-          "id": "dc85ecd2-4aca-4b1b-a69e-f1ec1b82d811"
-        },
-        {
-          "pacote": "IndQual Município",
-          "recurso": "indqual-municipio",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "3f841488-80a8-42f2-a6ca-e0c593b228de"
-        },
-        {
-          "pacote": "Bandeiras Tarifárias",
-          "recurso": "Dicionário de dados - Adicional",
-          "formato": "PDF",
-          "datastore": false,
-          "id": "1769e263-eb42-4f2e-b68f-e20c2250e6e5"
-        },
-        {
-          "pacote": "Bandeiras Tarifárias",
-          "recurso": "Bandeira Tarifária - Adicional",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "5879ca80-b3bd-45b1-a135-d9b77c1d5b36"
-        },
-        {
-          "pacote": "Bandeiras Tarifárias",
-          "recurso": "Dicionário de dados - Acionamento",
-          "formato": "PDF",
-          "datastore": false,
-          "id": "f6babd6e-c21f-4854-8288-d83ba4a08f1d"
-        },
-        {
-          "pacote": "Bandeiras Tarifárias",
-          "recurso": "Bandeira Tarifária - Acionamento",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "0591b8f6-fe54-437b-b72b-1aa2efd46e42"
-        },
-        {
-          "pacote": "Indqual Inadimplência",
-          "recurso": "Dicionário de dados",
-          "formato": "PDF",
-          "datastore": false,
-          "id": "8e8bc01c-bcfa-4be0-88cd-98c77936aa2e"
-        },
-        {
-          "pacote": "Indqual Inadimplência",
-          "recurso": "inadimplencia",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "0bb73b5d-b2e1-417d-9873-6de6b2d397d1"
-        },
-        {
-          "pacote": "Indqual Inadimplência",
-          "recurso": "dominio-indicadores",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "11f8d9bd-6d99-4d69-8edb-45c058da746f"
-        },
-        {
-          "pacote": "CFURH - Compensação Financeira pela Utilização de Recursos Hídricos",
-          "recurso": "Dicionário de dados - Área Alagada",
-          "formato": "PDF",
-          "datastore": false,
-          "id": "15bd55d8-7b6d-4bcd-866c-b31c704fd53b"
-        },
-        {
-          "pacote": "CFURH - Compensação Financeira pela Utilização de Recursos Hídricos",
-          "recurso": "cfurh-area-alagada.csv",
-          "formato": "CSV",
-          "datastore": true,
-          "id": "9e63214b-f262-46cb-a0e1-cb3c634368a0"
-        }
-      ]
     }
   ],
   "registro": [
-    "19:06:27 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
-    "19:06:28 IBGE 6579 (Estimativas da População): 1 indicadores",
-    "19:06:28 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
-    "19:06:28 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
-    "19:06:29 IBGE 5938 (PIB dos Municípios): 7 indicadores",
-    "19:06:29 BCB: 5 séries",
-    "19:06:30 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
-    "19:06:30 IBGE 5457 (Produção Agrícola Municipal): 4 indicadores",
-    "19:06:31 IBGE 2612 (Nascidos vivos — Registro Civil): 1 indicadores",
-    "19:06:33 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "19:06:36 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "19:06:45 ANEEL: 72 conjuntos no catálogo, 52 recursos inspecionados"
+    "21:31:10 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
+    "21:31:10 IBGE 6579 (Estimativas da População): 1 indicadores",
+    "21:31:11 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
+    "21:31:12 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "21:31:14 BCB: 5 séries",
+    "21:31:17 IBGE 5938 (PIB dos Municípios): 7 indicadores",
+    "21:31:20 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "21:31:20 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
+    "21:31:21 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
+    "21:31:21 IBGE 5457 (Produção Agrícola Municipal): 4 indicadores",
+    "21:31:22 IBGE 4709 (Censo 2022 — variação e taxa de crescimento): 3 indicadores",
+    "21:31:23 IBGE 6804 (Censo 2022 — abastecimento de água): 2 indicadores",
+    "21:31:23 IBGE 6805 (Censo 2022 — esgotamento sanitário): 2 indicadores",
+    "21:31:24 IBGE 6892 (Censo 2022 — destino do lixo): 2 indicadores",
+    "21:31:25 IBGE 2612 (Nascidos vivos — Registro Civil): 1 indicadores"
   ]
 }
