@@ -147,7 +147,7 @@ globalThis.fetch = async (url, opts = {}) => {
           list.push({ noMunMinsgUf: `${nome} - SP`, year: String(y), month: String(m), state: 'SP', metricFOB: String(Math.round(1e6 * (1 + rnd() * 3))) });
     } else {
       // agregado anual: a API só responde a janelas de anos inteiros
-      if (mDe !== 1 || mAte !== 12) return jsonRes({ data: { list: [] }, success: true });
+      if (mDe !== 1) return jsonRes({ data: { list: [] }, success: true });
       for (let ano = aDe; ano <= aAte; ano++) {
         for (const [, nome] of MUNS)
           list.push({ noMunMinsgUf: `${nome} - SP`, year: String(ano), state: 'SP', metricFOB: String(Math.round(1e7 * (1 + rnd() * 20))) });

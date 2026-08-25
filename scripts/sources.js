@@ -360,13 +360,16 @@ export async function coletarSiconfi(municipios, log) {
 const COMEX = 'https://api-comexstat.mdic.gov.br';
 
 /**
- * Aprendido com a resposta real da API: o endpoint /cities identifica o município
- * pelo NOME com a sigla da UF (campo `noMunMinsgUf`, ex.: "Atibaia - SP"), não por
- * código — daí o filtro numérico por `city` não casar com nada. Também não aceita
- * "year" em `details` (400 "Invalid detail item"), mas devolve o ano assim mesmo
- * quando `monthDetail` é falso. E limita a frequência de chamadas (429).
- * Por isso: uma consulta por fluxo cobrindo todos os anos, sem filtro, casando os
- * nomes localmente.
+ * Aprendido com as respostas reais da API:
+ *  - o município vem pelo NOME com a sigla da UF (`noMunMinsgUf`, ex.: "Atibaia - SP"),
+ *    não por código: o filtro numérico por `city` não casa com nada;
+ *  - "year" não é um `detail` válido (400 "Invalid detail item"), mas o ano volta
+ *    de qualquer forma quando `monthDetail` é falso;
+ *  - o recorte municipal existe apenas em granularidade ANUAL: janelas parciais e
+ *    `monthDetail: true` devolvem lista vazia, sem erro;
+ *  - há limite de frequência de chamadas (429, "tente novamente em 10 segundos").
+ * Por isso: uma consulta por fluxo cobrindo todos os anos fechados, sem filtro,
+ * casando os nomes localmente.
  */
 let ultimaChamadaComex = 0;
 async function comexCities(corpo) {
@@ -473,35 +476,43 @@ export async function coletarComex(municipios, log) {
       log?.(`Comex ${fluxo} anual FALHOU: ${e.message}`);
     }
 
-    /* --- acumulado dos últimos 12 meses --- */
-    try {
-      const de = new Date(Date.UTC(ultimoAno, ultimoMes - 12, 1));
-      const desde = `${de.getUTCFullYear()}-${String(de.getUTCMonth() + 1).padStart(2, '0')}`;
-      const ate = `${ultimoAno}-${String(ultimoMes).padStart(2, '0')}`;
-      const lista = await comexCities(corpo(fluxo, desde, ate, true));
-      const id12 = ehExp ? 'comex_export_12m' : 'comex_import_12m';
-      const ind12 = {
-        id: id12,
-        rotulo: ehExp ? 'Exportações — acumulado 12 meses' : 'Importações — acumulado 12 meses',
-        unidade: 'US$ FOB', grupo: 'Comércio exterior',
-        fonte: 'MDIC — Comex Stat (município de domicílio fiscal da empresa)',
-        fonteUrl: 'https://comexstat.mdic.gov.br/pt/municipio',
-        nota: `Soma de ${desde} a ${ate}.`, periodos: [ate], valores: {},
-      };
-      for (const r of lista) {
-        const m = casar(r);
-        const fob = fobDe(r);
-        if (!m || fob === null) continue;
-        ind12.valores[m.codigo] = ind12.valores[m.codigo] || {};
-        ind12.valores[m.codigo][ate] = (ind12.valores[m.codigo][ate] || 0) + fob;
+    /* --- acumulado do ano corrente ---
+       Tentativa: janela de janeiro ao último mês publicado. Se o recorte municipal
+       não aceitar ano parcial, degrada sem barulho — o dado simplesmente não existe
+       nessa granularidade. */
+    if (ultimoMes < 12) {
+      try {
+        const ate = `${ultimoAno}-${String(ultimoMes).padStart(2, '0')}`;
+        const lista = await comexCities(corpo(fluxo, `${ultimoAno}-01`, ate));
+        const idYtd = ehExp ? 'comex_export_ytd' : 'comex_import_ytd';
+        const indYtd = {
+          id: idYtd,
+          rotulo: ehExp ? 'Exportações — acumulado do ano' : 'Importações — acumulado do ano',
+          unidade: 'US$ FOB', grupo: 'Comércio exterior',
+          fonte: 'MDIC — Comex Stat (município de domicílio fiscal da empresa)',
+          fonteUrl: 'https://comexstat.mdic.gov.br/pt/municipio',
+          nota: `Janeiro a ${ate}. Ano ainda em curso: não comparável aos anos fechados.`,
+          periodos: [ate], valores: {},
+        };
+        for (const r of lista) {
+          const m = casar(r);
+          const fob = fobDe(r);
+          if (!m || fob === null) continue;
+          indYtd.valores[m.codigo] = indYtd.valores[m.codigo] || {};
+          indYtd.valores[m.codigo][ate] = (indYtd.valores[m.codigo][ate] || 0) + fob;
+        }
+        const veio = Object.keys(indYtd.valores).length > 0;
+        if (veio) indicadores[idYtd] = indYtd;
+        diagnostico.push({
+          fonte: 'Comex Stat', rotulo: `${fluxo} — acumulado do ano corrente`,
+          ok: veio, experimental: !veio, janela: `${ultimoAno}-01–${ate}`,
+          linhasRecebidas: lista.length,
+          nota: veio ? undefined : 'O recorte municipal do Comex Stat só é publicado por ano fechado.',
+        });
+      } catch (e) {
+        diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} — acumulado do ano corrente`,
+          ok: false, experimental: true, erro: String(e.message || e).slice(0, 220) });
       }
-      if (Object.keys(ind12.valores).length) indicadores[id12] = ind12;
-      diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} — acumulado 12 meses`,
-        ok: Object.keys(ind12.valores).length > 0, janela: `${desde}–${ate}`,
-        linhasRecebidas: lista.length });
-    } catch (e) {
-      diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} — acumulado 12 meses`,
-        ok: false, erro: String(e.message || e).slice(0, 220) });
     }
   }
   return { indicadores, diagnostico };
