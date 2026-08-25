@@ -419,9 +419,12 @@ export async function coletarComex(municipios, log) {
   };
   const fobDe = (r) => num(r.metricFOB ?? r.vlFob ?? r.fob);
 
-  const corpo = (fluxo, de, ate) => ({
+  // Com monthDetail falso a API agrega por ano e só responde a janelas de anos
+  // inteiros — uma janela móvel que atravessa o ano volta vazia. Para o acumulado
+  // de 12 meses pedimos detalhe mensal e somamos.
+  const corpo = (fluxo, de, ate, mensal = false) => ({
     flow: fluxo,
-    monthDetail: false,
+    monthDetail: mensal,
     period: { from: de, to: ate },
     filters: [],
     details: ['state', 'city'],
@@ -475,7 +478,7 @@ export async function coletarComex(municipios, log) {
       const de = new Date(Date.UTC(ultimoAno, ultimoMes - 12, 1));
       const desde = `${de.getUTCFullYear()}-${String(de.getUTCMonth() + 1).padStart(2, '0')}`;
       const ate = `${ultimoAno}-${String(ultimoMes).padStart(2, '0')}`;
-      const lista = await comexCities(corpo(fluxo, desde, ate));
+      const lista = await comexCities(corpo(fluxo, desde, ate, true));
       const id12 = ehExp ? 'comex_export_12m' : 'comex_import_12m';
       const ind12 = {
         id: id12,

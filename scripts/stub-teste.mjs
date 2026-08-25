@@ -137,14 +137,23 @@ globalThis.fetch = async (url, opts = {}) => {
   if (u.includes('api-comexstat')) {
     if (u.includes('dates/updated')) return jsonRes({ data: { updated: '2026-08-06', year: '2026', monthNumber: '07' }, success: true });
     const corpo = JSON.parse(opts.body || '{}');
-    const de = Number(String(corpo?.period?.from || '2019-01').slice(0, 4));
-    const ate = Number(String(corpo?.period?.to || '2025-12').slice(0, 4));
+    const [aDe, mDe] = String(corpo?.period?.from || '2019-01').split('-').map(Number);
+    const [aAte, mAte] = String(corpo?.period?.to || '2025-12').split('-').map(Number);
     const list = [];
-    for (let ano = de; ano <= ate; ano++) {
-      for (const [, nome] of MUNS)
-        list.push({ noMunMinsgUf: `${nome} - SP`, year: String(ano), state: 'SP', metricFOB: String(Math.round(1e7 * (1 + rnd() * 20))) });
-      list.push({ noMunMinsgUf: 'Sorocaba - SP', year: String(ano), state: 'SP', metricFOB: '999' });
-      list.push({ noMunMinsgUf: 'Atibaia - MG', year: String(ano), state: 'MG', metricFOB: '111' });
+    if (corpo.monthDetail) {
+      // detalhe mensal: uma linha por município por mês da janela
+      for (let y = aDe, m = mDe; y < aAte || (y === aAte && m <= mAte); m === 12 ? (m = 1, y++) : m++)
+        for (const [, nome] of MUNS)
+          list.push({ noMunMinsgUf: `${nome} - SP`, year: String(y), month: String(m), state: 'SP', metricFOB: String(Math.round(1e6 * (1 + rnd() * 3))) });
+    } else {
+      // agregado anual: a API só responde a janelas de anos inteiros
+      if (mDe !== 1 || mAte !== 12) return jsonRes({ data: { list: [] }, success: true });
+      for (let ano = aDe; ano <= aAte; ano++) {
+        for (const [, nome] of MUNS)
+          list.push({ noMunMinsgUf: `${nome} - SP`, year: String(ano), state: 'SP', metricFOB: String(Math.round(1e7 * (1 + rnd() * 20))) });
+        list.push({ noMunMinsgUf: 'Sorocaba - SP', year: String(ano), state: 'SP', metricFOB: '999' });
+        list.push({ noMunMinsgUf: 'Atibaia - MG', year: String(ano), state: 'MG', metricFOB: '111' });
+      }
     }
     return jsonRes({ data: { list }, success: true });
   }
