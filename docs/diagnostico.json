@@ -1,0 +1,200 @@
+{
+  "geradoEm": "2026-08-25T16:24:57.276Z",
+  "diagnostico": [
+    {
+      "fonte": "IBGE 6579",
+      "rotulo": "Estimativas da População",
+      "ok": true,
+      "indicadores": 1,
+      "nomeTabela": "População residente estimada",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2001,
+        "fim": 2025
+      },
+      "ms": 336
+    },
+    {
+      "fonte": "IBGE 4714",
+      "rotulo": "Censo 2022 — população, área e densidade",
+      "ok": true,
+      "indicadores": 3,
+      "nomeTabela": "População Residente, Área territorial e Densidade demográfica",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2022,
+        "fim": 2022
+      },
+      "ms": 321
+    },
+    {
+      "fonte": "IBGE 5938",
+      "rotulo": "PIB dos Municípios",
+      "ok": true,
+      "indicadores": 46,
+      "nomeTabela": "Produto interno bruto a preços correntes, impostos, líquidos de subsídios, sobre produtos a preços correntes e valor adicionado bruto a preços correntes total e por atividade econômica, e respectivas participações - Referência 2010",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2002,
+        "fim": 2023
+      },
+      "ms": 335
+    },
+    {
+      "fonte": "IBGE 1685",
+      "rotulo": "Cadastro Central de Empresas",
+      "ok": true,
+      "indicadores": 8,
+      "nomeTabela": "Unidades locais, empresas e outras organizações atuantes, pessoal ocupado total, pessoal ocupado assalariado, pessoal assalariado médio, salários e outras remunerações e salário médio mensal – série encerrada em 2021",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2006,
+        "fim": 2021
+      },
+      "ms": 325
+    },
+    {
+      "fonte": "IBGE 5457",
+      "rotulo": "Produção Agrícola Municipal",
+      "ok": true,
+      "indicadores": 8,
+      "nomeTabela": "Área plantada ou destinada à colheita, área colhida, quantidade produzida, rendimento médio e valor da produção das lavouras temporárias e permanentes",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 1974,
+        "fim": 2024
+      },
+      "ms": 364
+    },
+    {
+      "fonte": "IBGE 2612",
+      "rotulo": "Nascidos vivos — Registro Civil",
+      "ok": true,
+      "indicadores": 2,
+      "nomeTabela": "Nascidos vivos, ocorridos no ano, por mês do nascimento, sexo, local de nascimento, número de nascidos por parto, idade da mãe na ocasião do parto e lugar de residência da mãe",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2003,
+        "fim": 2024
+      },
+      "ms": 1640
+    },
+    {
+      "fonte": "Tesouro Nacional / SICONFI",
+      "rotulo": "Declaração de Contas Anuais (DCA)",
+      "ok": true,
+      "receitasOk": 64,
+      "despesasOk": 64,
+      "vazios": 0,
+      "erros": 0,
+      "errosExemplo": [],
+      "anos": [
+        2025,
+        2024,
+        2023,
+        2022,
+        2021,
+        2020,
+        2019,
+        2018
+      ],
+      "indicadores": 36
+    },
+    {
+      "fonte": "Comex Stat",
+      "rotulo": "export anual",
+      "ok": false,
+      "erro": "HTTP 400 em https://api-comexstat.mdic.gov.br/cities :: {\"error\":{\"code\":400,\"message\":\"Invalid detail item (year)\"}}"
+    },
+    {
+      "fonte": "Comex Stat",
+      "rotulo": "export 12 meses",
+      "ok": false,
+      "janela": "2025-08–2026-07",
+      "registros": 0
+    },
+    {
+      "fonte": "Comex Stat",
+      "rotulo": "import anual",
+      "ok": false,
+      "erro": "HTTP 429 em https://api-comexstat.mdic.gov.br/cities :: {\"error\":{\"code\":429,\"message\":\"Voc\\u00ea excedeu o limite de solicita\\u00e7\\u00f5es. Por favor, tente novamente em 10 segundos.\"}}"
+    },
+    {
+      "fonte": "Comex Stat",
+      "rotulo": "import 12 meses",
+      "ok": false,
+      "erro": "HTTP 429 em https://api-comexstat.mdic.gov.br/cities :: {\"error\":{\"code\":429,\"message\":\"Voc\\u00ea excedeu o limite de solicita\\u00e7\\u00f5es. Por favor, tente novamente em 10 segundos.\"}}"
+    },
+    {
+      "fonte": "BCB SGS",
+      "rotulo": "433",
+      "ok": false,
+      "erro": "HTTP 400 em https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados/ultimos/72?formato=json :: {\"erro\":{\"statusCode\":400,\"detail\":\"br.gov.bcb.pec.sgs.comum.excecoes.SGSNegocioException: A quantidade máxima de valores deve ser 20\"}}"
+    },
+    {
+      "fonte": "BCB SGS",
+      "rotulo": "4390",
+      "ok": false,
+      "erro": "HTTP 400 em https://api.bcb.gov.br/dados/serie/bcdata.sgs.4390/dados/ultimos/72?formato=json :: {\"erro\":{\"statusCode\":400,\"detail\":\"br.gov.bcb.pec.sgs.comum.excecoes.SGSNegocioException: A quantidade máxima de valores deve ser 20\"}}"
+    },
+    {
+      "fonte": "BCB SGS",
+      "rotulo": "24363",
+      "ok": false,
+      "erro": "HTTP 400 em https://api.bcb.gov.br/dados/serie/bcdata.sgs.24363/dados/ultimos/72?formato=json :: {\"erro\":{\"statusCode\":400,\"detail\":\"br.gov.bcb.pec.sgs.comum.excecoes.SGSNegocioException: A quantidade máxima de valores deve ser 20\"}}"
+    },
+    {
+      "fonte": "BCB SGS",
+      "rotulo": "1",
+      "ok": false,
+      "erro": "HTTP 400 em https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados/ultimos/72?formato=json :: {\"erro\":{\"statusCode\":400,\"detail\":\"br.gov.bcb.pec.sgs.comum.excecoes.SGSNegocioException: A quantidade máxima de valores deve ser 20\"}}"
+    },
+    {
+      "fonte": "BCB SGS",
+      "rotulo": "24380",
+      "ok": false,
+      "erro": "HTTP 400 em https://api.bcb.gov.br/dados/serie/bcdata.sgs.24380/dados/ultimos/72?formato=json :: {\"erro\":{\"statusCode\":400,\"detail\":\"br.gov.bcb.pec.sgs.comum.excecoes.SGSNegocioException: A quantidade máxima de valores deve ser 20\"}}"
+    },
+    {
+      "fonte": "Banco Central — SGS",
+      "rotulo": "contexto macroeconômico",
+      "ok": false,
+      "series": 0
+    },
+    {
+      "fonte": "ANEEL",
+      "rotulo": "Indqual Inadimplência",
+      "ok": false,
+      "recurso": "0bb73b5d-b2e1-417d-9873-6de6b2d397d1",
+      "registros": 0,
+      "camposExemplo": []
+    },
+    {
+      "fonte": "CAGED",
+      "rotulo": "https://dadosabertos.mte.gov.br/api/3/action/package_search?q=novo+caged&rows=5",
+      "ok": false,
+      "erro": "fetch failed"
+    },
+    {
+      "fonte": "CAGED",
+      "rotulo": "https://pdet.mte.gov.br/api/novocaged",
+      "ok": false,
+      "erro": "fetch failed"
+    }
+  ],
+  "registro": [
+    "16:24:37 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
+    "16:24:38 IBGE 6579 (Estimativas da População): 1 indicadores",
+    "16:24:38 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
+    "16:24:39 IBGE 5938 (PIB dos Municípios): 46 indicadores",
+    "16:24:39 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
+    "16:24:40 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
+    "16:24:41 IBGE 5457 (Produção Agrícola Municipal): 8 indicadores",
+    "16:24:43 IBGE 2612 (Nascidos vivos — Registro Civil): 2 indicadores",
+    "16:24:43 Comex export anual FALHOU: HTTP 400 em https://api-comexstat.mdic.gov.br/cities :: {\"error\":{\"code\":400,\"message\":\"Invalid detail item (year)\"}}",
+    "16:24:45 Comex export 12m: 0 registros (2025-08–2026-07)",
+    "16:24:46 ANEEL: 0 registros brutos (recurso 0bb73b5d-b2e1-417d-9873-6de6b2d397d1)",
+    "16:24:50 Comex import anual FALHOU: HTTP 429 em https://api-comexstat.mdic.gov.br/cities :: {\"error\":{\"code\":429,\"message\":\"Voc\\u00ea excedeu o limite de solicita\\u00e7\\u00f5es. Por favor, tente novamente em 10 segundos.\"}}",
+    "16:24:51 BCB: 0 séries"
+  ]
+}
