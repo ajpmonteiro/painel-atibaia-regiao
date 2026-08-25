@@ -136,10 +136,10 @@ globalThis.fetch = async (url, opts = {}) => {
 
   if (u.includes('api-comexstat')) {
     if (u.includes('dates/updated')) return jsonRes({ data: { updated: '2026-08-06', year: '2026', monthNumber: '07' }, success: true });
-    const list = [];
-    for (const [cod] of MUNS)
-      for (let ano = 2019; ano <= 2026; ano++)
-        list.push({ coMun: String(cod), year: String(ano), metricFOB: String(Math.round(1e7 * (1 + rnd() * 20))), metricKG: '1000' });
+    const corpo = JSON.parse(opts.body || '{}');
+    const de = String(corpo?.period?.from || '2020-01');
+    const list = MUNS.map(([cod]) => ({ coMun: String(cod), metricFOB: String(Math.round(1e7 * (1 + rnd() * 20))) }));
+    if (de === '2019-01') return new Response(JSON.stringify({ error: { code: 429, message: 'limite' } }), { status: 429 });
     return jsonRes({ data: { list }, success: true });
   }
 

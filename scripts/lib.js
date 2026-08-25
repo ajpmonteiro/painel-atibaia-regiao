@@ -70,13 +70,24 @@ export async function retry(fn, tentativas = 3, espera = 1500) {
 
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * Converte texto em número aceitando os dois formatos que aparecem nas fontes.
+ * O IBGE devolve "331.54" (ponto decimal); planilhas e alguns portais devolvem
+ * "1.234,56" (padrão brasileiro). A presença de vírgula é o que distingue os dois:
+ * sem vírgula, o ponto é decimal e não pode ser removido — remover transformava
+ * 331.54 em 33154.
+ */
 export function num(v) {
   if (v === null || v === undefined) return null;
   if (typeof v === 'number') return Number.isFinite(v) ? v : null;
   const s = String(v).trim();
-  if (s === '' || s === '-' || s === '..' || s === '...' || s === 'X') return null;
-  const n = Number(s.replace(/\./g, '').replace(',', '.'));
-  return Number.isFinite(n) ? n : Number.isFinite(Number(s)) ? Number(s) : null;
+  if (s === '' || ['-', '..', '...', 'X', 'x', '_', 'NA'].includes(s)) return null;
+  if (s.includes(',')) {
+    const n = Number(s.replace(/\./g, '').replace(',', '.'));
+    return Number.isFinite(n) ? n : null;
+  }
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
 }
 
 export function norm(s) {

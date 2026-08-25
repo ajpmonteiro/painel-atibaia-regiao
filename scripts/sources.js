@@ -92,16 +92,21 @@ export const TABELAS_IBGE = [
     rotulo: 'Censo 2022 — população, área e densidade', fonte: 'IBGE — Censo Demográfico 2022' },
 
   { chave: 'pib', agg: 5938, periodos: '-14', grupo: 'Economia',
-    rotulo: 'PIB dos Municípios', fonte: 'IBGE — Produto Interno Bruto dos Municípios' },
+    rotulo: 'PIB dos Municípios', fonte: 'IBGE — Produto Interno Bruto dos Municípios',
+    // As variáveis "Participação ..." repetem o mesmo rótulo para Brasil, UF e região;
+    // o painel calcula as suas próprias participações a partir dos valores absolutos.
+    excluir: /^particip/i },
 
   { chave: 'cempre', agg: 1685, periodos: '-12', grupo: 'Empresas e trabalho',
     rotulo: 'Cadastro Central de Empresas', fonte: 'IBGE — CEMPRE', apenasTotal: true },
 
   { chave: 'pam', agg: 5457, periodos: '-6', grupo: 'Agropecuária',
-    rotulo: 'Produção Agrícola Municipal', fonte: 'IBGE — PAM', somaCategorias: true },
+    rotulo: 'Produção Agrícola Municipal', fonte: 'IBGE — PAM', somaCategorias: true,
+    excluir: /percentual do total geral/i },
 
   { chave: 'registro', agg: 2612, periodos: '-8', grupo: 'Demografia',
-    rotulo: 'Nascidos vivos — Registro Civil', fonte: 'IBGE — Estatísticas do Registro Civil', apenasTotal: true },
+    rotulo: 'Nascidos vivos — Registro Civil', fonte: 'IBGE — Estatísticas do Registro Civil',
+    apenasTotal: true, excluir: /percentual do total geral/i },
 ];
 
 function classificacaoTotal(meta) {
@@ -128,8 +133,10 @@ export async function coletarIBGE(municipios, log) {
     const t0 = Date.now();
     try {
       const meta = await ibgeMetadados(t.agg);
-      const variaveis = (meta.variaveis || []).map((v) => v.id);
-      if (!variaveis.length) throw new Error('metadados sem variaveis');
+      const variaveis = (meta.variaveis || [])
+        .filter((v) => !t.excluir || !t.excluir.test(v.nome || ''))
+        .map((v) => v.id);
+      if (!variaveis.length) throw new Error('metadados sem variaveis utilizáveis');
 
       let classificacao = null;
       if (t.apenasTotal) classificacao = classificacaoTotal(meta);
@@ -351,6 +358,30 @@ export async function coletarSiconfi(municipios, log) {
 
 const COMEX = 'https://api-comexstat.mdic.gov.br';
 
+/**
+ * O endpoint /cities não aceita "year" em `details` (devolve 400 "Invalid detail
+ * item") e limita a frequência de chamadas (429 pedindo 10 s de espera). Por isso
+ * a série anual é montada com uma consulta por ano, espaçadas.
+ */
+let ultimaChamadaComex = 0;
+async function comexCities(corpo) {
+  const espera = 4000 - (Date.now() - ultimaChamadaComex);
+  if (espera > 0) await sleep(espera);
+  ultimaChamadaComex = Date.now();
+  try {
+    const j = await httpPost(`${COMEX}/cities`, corpo, { timeout: 90000 });
+    return j?.data?.list || (Array.isArray(j?.data) ? j.data : []) || [];
+  } catch (e) {
+    if (/HTTP 429/.test(e.message)) {
+      await sleep(15000);
+      ultimaChamadaComex = Date.now();
+      const j = await httpPost(`${COMEX}/cities`, corpo, { timeout: 90000 });
+      return j?.data?.list || (Array.isArray(j?.data) ? j.data : []) || [];
+    }
+    throw e;
+  }
+}
+
 export async function coletarComex(municipios, log) {
   const indicadores = {};
   const diagnostico = [];
@@ -365,124 +396,131 @@ export async function coletarComex(municipios, log) {
     ultimoMes = 12;
   }
 
-  // Só anos completos entram na série anual: um ano em curso pareceria uma queda.
+  // Um ano em curso pareceria uma queda: a série anual só usa anos fechados.
   const anoFim = ultimoMes >= 12 ? ultimoAno : ultimoAno - 1;
   const anoIni = anoFim - 7;
-
-  const consultar = async (fluxo, corpo) => {
-    const j = await retry(() => httpPost(`${COMEX}/cities`, corpo), 2, 4000);
-    return j?.data?.list || (Array.isArray(j?.data) ? j.data : []) || [];
-  };
-  const codMun = (r) => String(r.coMun ?? r.city ?? r.coMunicipio ?? '').replace(/\D/g, '');
+  const valores = municipios.map((m) => Number(m.codigo));
+  const codMun = (r) => String(r.coMun ?? r.city ?? r.coMunicipio ?? r.municipality ?? '').replace(/\D/g, '');
   const casar = (raw) => municipios.find((m) => m.codigo.slice(0, 6) === raw.slice(0, 6));
+  const fobDe = (r) => num(r.metricFOB ?? r.vlFob ?? r.fob ?? r.metricfob);
 
   for (const fluxo of ['export', 'import']) {
     const ehExp = fluxo === 'export';
-    /* --- série anual (anos fechados) --- */
-    try {
-      const lista = await consultar(fluxo, {
-        flow: fluxo, monthDetail: false,
-        period: { from: `${anoIni}-01`, to: `${anoFim}-12` },
-        filters: [{ filter: 'city', values: municipios.map((m) => Number(m.codigo)) }],
-        details: ['city', 'year'], metrics: ['metricFOB', 'metricKG'],
-      });
-      const id = ehExp ? 'comex_export_fob' : 'comex_import_fob';
-      const ind = {
-        id, rotulo: ehExp ? 'Exportações (US$ FOB)' : 'Importações (US$ FOB)',
-        unidade: 'US$ FOB', grupo: 'Comércio exterior',
-        fonte: 'MDIC — Comex Stat (município de domicílio fiscal da empresa)',
-        fonteUrl: 'https://comexstat.mdic.gov.br/pt/municipio',
-        nota: `Somente anos fechados. Base atualizada em ${atualizado || 's/d'}.`,
-        periodos: [], valores: {},
-      };
-      for (const r of lista) {
-        const alvo = casar(codMun(r));
-        const ano = String(r.year ?? r.coAno ?? '');
-        const fob = num(r.metricFOB ?? r.vlFob ?? r.fob);
-        if (!alvo || !/^\d{4}$/.test(ano) || fob === null || Number(ano) > anoFim) continue;
-        ind.valores[alvo.codigo] = ind.valores[alvo.codigo] || {};
-        ind.valores[alvo.codigo][ano] = (ind.valores[alvo.codigo][ano] || 0) + fob;
-        if (!ind.periodos.includes(ano)) ind.periodos.push(ano);
+    const id = ehExp ? 'comex_export_fob' : 'comex_import_fob';
+    const ind = {
+      id, rotulo: ehExp ? 'Exportações (US$ FOB)' : 'Importações (US$ FOB)',
+      unidade: 'US$ FOB', grupo: 'Comércio exterior',
+      fonte: 'MDIC — Comex Stat (município de domicílio fiscal da empresa)',
+      fonteUrl: 'https://comexstat.mdic.gov.br/pt/municipio',
+      nota: `Somente anos fechados. Base atualizada em ${atualizado || 's/d'}.`,
+      periodos: [], valores: {},
+    };
+    let anosOk = 0, ultimoErro = null;
+
+    for (let ano = anoIni; ano <= anoFim; ano++) {
+      try {
+        const lista = await comexCities({
+          flow: fluxo, monthDetail: false,
+          period: { from: `${ano}-01`, to: `${ano}-12` },
+          filters: [{ filter: 'city', values: valores }],
+          details: ['city'], metrics: ['metricFOB'],
+        });
+        let entrou = 0;
+        for (const r of lista) {
+          const alvo = casar(codMun(r));
+          const fob = fobDe(r);
+          if (!alvo || fob === null) continue;
+          ind.valores[alvo.codigo] = ind.valores[alvo.codigo] || {};
+          ind.valores[alvo.codigo][String(ano)] = (ind.valores[alvo.codigo][String(ano)] || 0) + fob;
+          entrou++;
+        }
+        if (entrou) { ind.periodos.push(String(ano)); anosOk++; }
+      } catch (e) {
+        ultimoErro = String(e.message || e).slice(0, 200);
       }
-      ind.periodos.sort();
-      if (ind.periodos.length) indicadores[id] = ind;
-      diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} anual`, ok: ind.periodos.length > 0,
-        registros: lista.length, periodo: `${anoIni}–${anoFim}`, atualizado });
-      log?.(`Comex ${fluxo} anual: ${lista.length} registros (${anoIni}–${anoFim})`);
-    } catch (e) {
-      diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} anual`, ok: false, erro: String(e.message || e) });
-      log?.(`Comex ${fluxo} anual FALHOU: ${e.message}`);
     }
-    await sleep(800);
+    ind.periodos.sort();
+    if (ind.periodos.length) indicadores[id] = ind;
+    diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} — série anual`,
+      ok: anosOk > 0, anosComDados: anosOk, periodo: `${anoIni}–${anoFim}`,
+      atualizado, erro: anosOk ? undefined : ultimoErro });
+    log?.(`Comex ${fluxo}: ${anosOk} anos com dados (${anoIni}–${anoFim})`);
 
     /* --- acumulado dos últimos 12 meses --- */
     try {
       const de = new Date(Date.UTC(ultimoAno, ultimoMes - 12, 1));
       const desde = `${de.getUTCFullYear()}-${String(de.getUTCMonth() + 1).padStart(2, '0')}`;
       const ate = `${ultimoAno}-${String(ultimoMes).padStart(2, '0')}`;
-      const lista = await consultar(fluxo, {
+      const lista = await comexCities({
         flow: fluxo, monthDetail: false,
         period: { from: desde, to: ate },
-        filters: [{ filter: 'city', values: municipios.map((m) => Number(m.codigo)) }],
+        filters: [{ filter: 'city', values: valores }],
         details: ['city'], metrics: ['metricFOB'],
       });
-      const id = ehExp ? 'comex_export_12m' : 'comex_import_12m';
-      const per = ate;
-      const ind = {
-        id, rotulo: ehExp ? 'Exportações — acumulado 12 meses' : 'Importações — acumulado 12 meses',
+      const id12 = ehExp ? 'comex_export_12m' : 'comex_import_12m';
+      const ind12 = {
+        id: id12,
+        rotulo: ehExp ? 'Exportações — acumulado 12 meses' : 'Importações — acumulado 12 meses',
         unidade: 'US$ FOB', grupo: 'Comércio exterior',
         fonte: 'MDIC — Comex Stat (município de domicílio fiscal da empresa)',
         fonteUrl: 'https://comexstat.mdic.gov.br/pt/municipio',
-        nota: `Soma de ${desde} a ${ate}.`, periodos: [per], valores: {},
+        nota: `Soma de ${desde} a ${ate}.`, periodos: [ate], valores: {},
       };
       for (const r of lista) {
         const alvo = casar(codMun(r));
-        const fob = num(r.metricFOB ?? r.vlFob ?? r.fob);
+        const fob = fobDe(r);
         if (!alvo || fob === null) continue;
-        ind.valores[alvo.codigo] = ind.valores[alvo.codigo] || {};
-        ind.valores[alvo.codigo][per] = (ind.valores[alvo.codigo][per] || 0) + fob;
+        ind12.valores[alvo.codigo] = ind12.valores[alvo.codigo] || {};
+        ind12.valores[alvo.codigo][ate] = (ind12.valores[alvo.codigo][ate] || 0) + fob;
       }
-      if (Object.keys(ind.valores).length) indicadores[id] = ind;
-      diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} 12 meses`,
-        ok: Object.keys(ind.valores).length > 0, janela: `${desde}–${ate}`, registros: lista.length });
-      log?.(`Comex ${fluxo} 12m: ${lista.length} registros (${desde}–${ate})`);
+      if (Object.keys(ind12.valores).length) indicadores[id12] = ind12;
+      diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} — acumulado 12 meses`,
+        ok: Object.keys(ind12.valores).length > 0, janela: `${desde}–${ate}` });
     } catch (e) {
-      diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} 12 meses`, ok: false, erro: String(e.message || e) });
+      diagnostico.push({ fonte: 'Comex Stat', rotulo: `${fluxo} — acumulado 12 meses`,
+        ok: false, erro: String(e.message || e).slice(0, 200) });
     }
-    await sleep(800);
   }
   return { indicadores, diagnostico };
 }
 
-/* ------------------------------------------------------------------ */
-/* Banco Central - contexto macro                                      */
-/* ------------------------------------------------------------------ */
-
+// O endpoint /ultimos/N do SGS recusa N > 20 ("A quantidade máxima de valores
+// deve ser 20"), então a série vem por janela de datas.
 const SGS = [
-  { serie: 433, id: 'macro_ipca', rotulo: 'IPCA — variação mensal', unidade: '% a.m.' },
-  { serie: 4390, id: 'macro_selic', rotulo: 'Selic — taxa mensal', unidade: '% a.m.' },
-  { serie: 24363, id: 'macro_ibcbr', rotulo: 'IBC-Br — atividade econômica', unidade: 'índice' },
-  { serie: 1, id: 'macro_cambio', rotulo: 'Dólar comercial (venda)', unidade: 'R$/US$' },
-  { serie: 24380, id: 'macro_desocupacao', rotulo: 'Taxa de desocupação (PNAD Contínua)', unidade: '%' },
+  { serie: 433, id: 'macro_ipca', rotulo: 'IPCA — variação mensal', unidade: '% a.m.', meses: 72 },
+  { serie: 4390, id: 'macro_selic', rotulo: 'Selic — taxa mensal', unidade: '% a.m.', meses: 72 },
+  { serie: 24363, id: 'macro_ibcbr', rotulo: 'IBC-Br — atividade econômica', unidade: 'índice', meses: 72 },
+  { serie: 1, id: 'macro_cambio', rotulo: 'Dólar comercial (venda)', unidade: 'R$/US$', meses: 12 },
+  { serie: 24369, id: 'macro_desocupacao', rotulo: 'Taxa de desocupação (PNAD Contínua)', unidade: '%', meses: 72 },
 ];
+
+const dataBR = (d) =>
+  `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
 
 export async function coletarMacro(log) {
   const macro = {};
   const diagnostico = [];
+  const hoje = new Date();
   for (const s of SGS) {
     try {
-      const j = await retry(
-        () => httpGet(`https://api.bcb.gov.br/dados/serie/bcdata.sgs.${s.serie}/dados/ultimos/72?formato=json`),
-        2, 1500
-      );
+      const de = new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() - s.meses, 1));
+      const url =
+        `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${s.serie}/dados?formato=json` +
+        `&dataInicial=${dataBR(de)}&dataFinal=${dataBR(hoje)}`;
+      const j = await retry(() => httpGet(url, { timeout: 45000 }), 2, 1500);
+      const pontos = (j || [])
+        .map((p) => ({ data: p.data, valor: num(p.valor) }))
+        .filter((p) => p.valor !== null);
+      if (!pontos.length) throw new Error('série vazia no período');
       macro[s.id] = {
         id: s.id, rotulo: s.rotulo, unidade: s.unidade,
         fonte: 'Banco Central do Brasil — SGS',
         fonteUrl: `https://www3.bcb.gov.br/sgspub/consultarvalores/telaCvsSelecionarSeries.paint?SERIE=${s.serie}`,
-        pontos: (j || []).map((p) => ({ data: p.data, valor: num(p.valor) })).filter((p) => p.valor !== null),
+        pontos: pontos.slice(-120),
       };
     } catch (e) {
-      diagnostico.push({ fonte: 'BCB SGS', rotulo: String(s.serie), ok: false, erro: String(e.message || e) });
+      diagnostico.push({ fonte: 'Banco Central — SGS', rotulo: `série ${s.serie} (${s.rotulo})`,
+        ok: false, erro: String(e.message || e) });
     }
   }
   diagnostico.push({ fonte: 'Banco Central — SGS', rotulo: 'contexto macroeconômico',
@@ -492,71 +530,47 @@ export async function coletarMacro(log) {
 }
 
 /* ------------------------------------------------------------------ */
-/* ANEEL - consumo de energia eletrica por municipio (proxy de         */
-/* atividade economica, mensal)                                        */
+/* ANEEL - consumo de energia por municipio (em avaliacao)             */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Consumo mensal de energia é um dos melhores termômetros de atividade econômica
+ * local, mas o portal da ANEEL reorganiza os conjuntos com frequência e o nome do
+ * recurso muda. Esta rodada apenas identifica e registra os candidatos: o
+ * diagnóstico lista o que foi encontrado para que a extração seja fixada no
+ * recurso certo. Marcada como experimental — não conta como falha do painel.
+ */
 export async function coletarAneel(municipios, log) {
   const indicadores = {};
-  const diagnostico = [];
-  try {
-    const busca = await retry(
-      () => httpGet('https://dadosabertos.aneel.gov.br/api/3/action/package_search?q=consumo+mensal+classe+municipio&rows=10'),
-      2, 2500
-    );
-    const pacotes = busca?.result?.results || [];
-    const recursos = pacotes
-      .flatMap((p) => (p.resources || []).map((r) => ({ ...r, pacote: p.title })))
-      .filter((r) => /datastore|csv/i.test(r.format || '') && r.datastore_active);
-    const alvo = recursos[0];
-    if (!alvo) throw new Error('nenhum recurso datastore encontrado');
-
-    const nomes = municipios.map((m) => m.nome.toUpperCase());
-    const linhas = [];
-    for (const nome of nomes) {
-      const url =
-        `https://dadosabertos.aneel.gov.br/api/3/action/datastore_search?resource_id=${alvo.id}` +
-        `&q=${encodeURIComponent(nome)}&limit=2000`;
-      const j = await retry(() => httpGet(url, { timeout: 90000 }), 2, 2000);
-      linhas.push(...(j?.result?.records || []));
-      await sleep(400);
-    }
-    diagnostico.push({
-      fonte: 'ANEEL', rotulo: alvo.pacote || alvo.name, ok: linhas.length > 0,
-      recurso: alvo.id, registros: linhas.length,
-      camposExemplo: linhas[0] ? Object.keys(linhas[0]) : [],
-    });
-    log?.(`ANEEL: ${linhas.length} registros brutos (recurso ${alvo.id})`);
-    // A estrutura de campos da ANEEL varia por publicacao; o diagnostico acima
-    // registra os campos disponiveis para consolidacao na proxima rodada.
-  } catch (e) {
-    diagnostico.push({ fonte: 'ANEEL', rotulo: 'consumo de energia', ok: false, erro: String(e.message || e) });
-    log?.(`ANEEL FALHOU: ${e.message}`);
-  }
-  return { indicadores, diagnostico };
-}
-
-/* ------------------------------------------------------------------ */
-/* Ministerio do Trabalho - Novo CAGED (saldo de empregos formais)      */
-/* ------------------------------------------------------------------ */
-
-export async function coletarCaged(municipios, log) {
-  const indicadores = {};
-  const diagnostico = [];
-  const candidatos = [
-    'https://dadosabertos.mte.gov.br/api/3/action/package_search?q=novo+caged&rows=5',
-    'https://pdet.mte.gov.br/api/novocaged',
-  ];
-  for (const url of candidatos) {
+  const candidatos = [];
+  const consultas = ['consumo+energia+municipio', 'consumo+mensal+classe', 'consumidores+consumo+receita'];
+  for (const q of consultas) {
     try {
-      const j = await httpGet(url, { timeout: 45000 });
-      diagnostico.push({ fonte: 'CAGED', rotulo: url, ok: true,
-        amostra: JSON.stringify(j).slice(0, 400) });
-      log?.(`CAGED: resposta de ${url}`);
-      break;
+      const j = await httpGet(
+        `https://dadosabertos.aneel.gov.br/api/3/action/package_search?q=${q}&rows=10`,
+        { timeout: 45000 }
+      );
+      for (const p of j?.result?.results || []) {
+        const titulo = String(p.title || p.name || '');
+        if (!/consumo/i.test(titulo)) continue;
+        for (const r of p.resources || []) {
+          if (!r.datastore_active) continue;
+          candidatos.push({ pacote: titulo, recurso: r.name, id: r.id });
+        }
+      }
     } catch (e) {
-      diagnostico.push({ fonte: 'CAGED', rotulo: url, ok: false, erro: String(e.message || e) });
+      candidatos.push({ consulta: q, erro: String(e.message || e).slice(0, 120) });
     }
+    await sleep(600);
   }
-  return { indicadores, diagnostico };
+  log?.(`ANEEL: ${candidatos.length} recursos candidatos identificados`);
+  return {
+    indicadores,
+    diagnostico: [{
+      fonte: 'ANEEL — Dados Abertos', rotulo: 'consumo de energia elétrica',
+      ok: false, experimental: true,
+      nota: 'Fonte em avaliação: nenhum indicador extraído ainda.',
+      candidatos: candidatos.slice(0, 12),
+    }],
+  };
 }

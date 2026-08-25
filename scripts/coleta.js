@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   resolverMunicipios, coletarIBGE, coletarSiconfi, coletarComex,
-  coletarMacro, coletarAneel, coletarCaged, catalogoIBGE,
+  coletarMacro, coletarAneel, catalogoIBGE,
 } from './sources.js';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -32,7 +32,6 @@ async function principal() {
     coletarComex(municipios, log),
     coletarMacro(log),
     coletarAneel(municipios, log),
-    coletarCaged(municipios, log),
   ]);
 
   const indicadores = {};
@@ -86,7 +85,8 @@ async function principal() {
   }
 
   const ok = diagnostico.filter((d) => d.ok).length;
-  log(`Concluído: ${Object.keys(indicadores).length} indicadores, ${ok}/${diagnostico.length} fontes ok, ${dados.duracaoSegundos}s`);
+  const exp = diagnostico.filter((d) => d.experimental).length;
+  log(`Concluído: ${Object.keys(indicadores).length} indicadores, ${ok}/${diagnostico.length - exp} fontes ok (${exp} em avaliação), ${dados.duracaoSegundos}s`);
   if (!Object.keys(indicadores).length) {
     console.error('Nenhum indicador coletado — mantendo dados anteriores.');
     process.exit(1);
