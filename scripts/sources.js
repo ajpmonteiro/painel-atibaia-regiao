@@ -5,36 +5,65 @@ import { httpGet, httpPost, retry, num, norm, pool, sleep } from './lib.js';
 /* Municipios do recorte                                               */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Os códigos vêm da própria API de localidades do IBGE (verificados em 25/08/2026) e
+ * ficam gravados aqui de propósito: são estáveis por décadas, e sem eles uma oscilação
+ * de rede na primeira chamada derrubava a coleta inteira — inclusive Tesouro, Comex e
+ * Banco Central, que não dependem do IBGE para nada.
+ */
 export const MUNICIPIOS_ALVO = [
-  { nome: 'Atibaia', destaque: true },
-  { nome: 'Bragança Paulista' },
-  { nome: 'Itatiba' },
-  { nome: 'Jarinu' },
-  { nome: 'Bom Jesus dos Perdões' },
-  { nome: 'Nazaré Paulista' },
-  { nome: 'Piracaia' },
-  { nome: 'Jundiaí' },
+  { codigo: '3504107', nome: 'Atibaia', destaque: true },
+  { codigo: '3507605', nome: 'Bragança Paulista' },
+  { codigo: '3523404', nome: 'Itatiba' },
+  { codigo: '3525201', nome: 'Jarinu' },
+  { codigo: '3507100', nome: 'Bom Jesus dos Perdões' },
+  { codigo: '3532405', nome: 'Nazaré Paulista' },
+  { codigo: '3538600', nome: 'Piracaia' },
+  { codigo: '3525904', nome: 'Jundiaí' },
 ];
 
 const IBGE = 'https://servicodados.ibge.gov.br';
 
-export async function resolverMunicipios() {
-  const lista = await retry(() => httpGet(`${IBGE}/api/v1/localidades/estados/35/municipios`));
-  const porNome = new Map(lista.map((m) => [norm(m.nome), m]));
-  return MUNICIPIOS_ALVO.map((alvo) => {
-    const m = porNome.get(norm(alvo.nome));
-    if (!m) throw new Error(`Municipio nao encontrado no IBGE: ${alvo.nome}`);
-    return {
-      codigo: String(m.id),
-      nome: m.nome,
-      destaque: !!alvo.destaque,
-      microrregiao: m.microrregiao?.nome || null,
-      mesorregiao: m.microrregiao?.mesorregiao?.nome || null,
-      regiaoImediata: m['regiao-imediata']?.nome || null,
-      regiaoIntermediaria: m['regiao-imediata']?.['regiao-intermediaria']?.nome || null,
-      uf: m.microrregiao?.mesorregiao?.UF?.sigla || 'SP',
-    };
-  });
+const municipioBasico = (alvo) => ({
+  codigo: alvo.codigo,
+  nome: alvo.nome,
+  destaque: !!alvo.destaque,
+  microrregiao: 'Bragança Paulista',
+  mesorregiao: 'Macro Metropolitana Paulista',
+  regiaoImediata: null,
+  regiaoIntermediaria: null,
+  uf: 'SP',
+});
+
+/**
+ * Enriquece o recorte com os dados de região do IBGE. Se a API não responder,
+ * segue com os códigos gravados: a coleta não pode morrer numa oscilação de rede.
+ */
+export async function resolverMunicipios(log) {
+  try {
+    const lista = await retry(
+      () => httpGet(`${IBGE}/api/v1/localidades/estados/35/municipios`, { timeout: 60000 }),
+      4, 4000
+    );
+    const porCodigo = new Map(lista.map((m) => [String(m.id), m]));
+    return MUNICIPIOS_ALVO.map((alvo) => {
+      const m = porCodigo.get(alvo.codigo);
+      if (!m) return municipioBasico(alvo);
+      return {
+        codigo: alvo.codigo,
+        nome: m.nome,
+        destaque: !!alvo.destaque,
+        microrregiao: m.microrregiao?.nome || null,
+        mesorregiao: m.microrregiao?.mesorregiao?.nome || null,
+        regiaoImediata: m['regiao-imediata']?.nome || null,
+        regiaoIntermediaria: m['regiao-imediata']?.['regiao-intermediaria']?.nome || null,
+        uf: m.microrregiao?.mesorregiao?.UF?.sigla || 'SP',
+      };
+    });
+  } catch (e) {
+    log?.(`Localidades do IBGE indisponível (${e.message}); seguindo com os códigos gravados.`);
+    return MUNICIPIOS_ALVO.map(municipioBasico);
+  }
 }
 
 /* ------------------------------------------------------------------ */

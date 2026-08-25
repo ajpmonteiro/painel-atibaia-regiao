@@ -23,7 +23,7 @@ const log = (m) => {
 
 async function principal() {
   const t0 = Date.now();
-  const municipios = await resolverMunicipios();
+  const municipios = await resolverMunicipios(log);
   log(`Municípios: ${municipios.map((m) => m.nome).join(', ')}`);
 
   const blocos = await Promise.allSettled([
