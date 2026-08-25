@@ -60,7 +60,7 @@ arquivos mensais compactados de Brasil inteiro.
 | `HTTP 400` no Banco Central | O endpoint `/ultimos/N` do SGS recusa N > 20; usar janela por datas |
 | Comex responde mas nada casa | O município vem por nome, não por código |
 | Workflow verde sem gravar dados | `git add` aborta inteiro se um dos caminhos não existir |
-| Percentual acima de 100% | Ao fatiar uma tabela com duas classificações, cruzar todas conta o mesmo domicílio mais de uma vez: fixe as outras no "Total" |
+| Percentual acima de 100% | Duas causas: cruzar todas as classificações (fixe as outras no "Total") **e** somar categorias hierárquicas — "Coletado" já contém "Coletado no domicílio" e "Depositado em caçamba". Use só o nível mais alto (`nivel` nos metadados) |
 | Push rejeitado, coleta perdida | O repositório avança enquanto a coleta roda; é preciso rebasear antes do push (e clone completo, senão o rebase falha) |
 | Uma oscilação de rede derruba tudo | A primeira chamada não pode ser um ponto único de falha: os códigos dos municípios ficam gravados no código |
 
