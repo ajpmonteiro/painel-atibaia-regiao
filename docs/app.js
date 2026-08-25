@@ -551,8 +551,13 @@ function secComex() {
   if (exp) g.appendChild(cartaoGrafico('Exportações', '<span style="color:var(--ink-3)">US$ FOB por ano · MDIC/Comex Stat</span>', grafLinhas(exp, cods, { largura: 540 }), cods));
   if (sal) { const a = ultimoAno(sal); g.appendChild(cartaoGrafico('Saldo comercial', `<span style="color:var(--ink-3)">exportações − importações · ${a}</span>`, grafBarras(sal, a, { largura: 540 }))); }
   if (imp) g.appendChild(cartaoGrafico('Importações', '<span style="color:var(--ink-3)">US$ FOB por ano · MDIC/Comex Stat</span>', grafLinhas(imp, cods, { largura: 540 }), cods));
+  const jund = MUNS.find((m) => /jundia/i.test(m.nome));
+  const avisoEscala = jund && ativos.has(jund.codigo)
+    ? ' <b>Jundiaí opera em outra ordem de grandeza</b> e achata as demais nos gráficos: desligue-a nos botões de município, no topo da página, para comparar o resto da região.'
+    : '';
   return bloco('Comércio exterior',
-    'Valores atribuídos ao município de domicílio fiscal da empresa exportadora ou importadora — um bom termômetro da presença industrial e da inserção externa de cada cidade.',
+    'Valores atribuídos ao município de domicílio fiscal da empresa exportadora ou importadora — um bom termômetro da presença industrial e da inserção externa de cada cidade.'
+    + avisoEscala,
     g);
 }
 
