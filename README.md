@@ -23,11 +23,10 @@ Nenhum servidor para manter, nenhum custo: o motor roda dentro do GitHub Actions
 
 | Fonte | O que traz | Frequência |
 |---|---|---|
-| **IBGE — API de Agregados (SIDRA)** | população estimada, Censo 2022, PIB municipal e valor adicionado por setor, Cadastro Central de Empresas, produção agrícola e pecuária, registro civil | anual |
+| **IBGE — API de Agregados (SIDRA)** | população estimada, Censo 2022 (população, área, densidade, crescimento, água, esgoto, lixo), PIB municipal e valor adicionado por setor, Cadastro Central de Empresas, produção agrícola, registro civil | anual |
 | **Tesouro Nacional — SICONFI/DCA** | receitas e despesas de cada prefeitura, despesa por função (educação, saúde, urbanismo…) | anual |
 | **MDIC — Comex Stat** | exportações e importações por município da empresa | anual¹ |
 | **Banco Central — SGS** | IPCA, Selic, IBC-Br, câmbio, desocupação (contexto nacional) | mensal |
-| **ANEEL — Dados Abertos** | consumo de energia elétrica por município (em consolidação) | mensal |
 
 ¹ O recorte municipal do Comex Stat só é publicado por ano fechado. Janelas parciais e
 `monthDetail: true` devolvem lista vazia — por isso a série usa apenas anos completos.
@@ -39,6 +38,20 @@ setorial, dependência de transferências, autonomia tributária, saldo comercia
 calculados na coleta e identificados como “cálculo próprio”. O PIB por habitante é
 calculado porque a tabela 5938 do SIDRA não publica essa variável.
 
+### Fontes verificadas e descartadas
+
+**ANEEL — Dados Abertos.** O consumo mensal de energia por município seria o único
+indicador de frequência mensal e recorte local do painel. A leitura do catálogo
+completo (72 conjuntos) não encontrou consumo por município: o mais próximo é o SAMP,
+cujo recorte é a **distribuidora**, que atende dezenas de municípios e não permite
+atribuir consumo a nenhum. O restante é tarifa, qualidade, interrupção, geração e
+subsídio. Consumo municipal é publicado pela EPE em planilhas do Anuário Estatístico,
+sem API — exigiria um raspador, não um cliente de API.
+
+**Novo CAGED.** Saldo mensal de empregos formais por município. Não há API pública
+estável; os dois hosts testados não resolvem DNS. Os microdados existem em FTP, em
+arquivos mensais compactados de Brasil inteiro.
+
 ### Armadilhas já encontradas nestas fontes
 
 | Sintoma | Causa |
@@ -47,6 +60,10 @@ calculado porque a tabela 5938 do SIDRA não publica essa variável.
 | `HTTP 400` no Banco Central | O endpoint `/ultimos/N` do SGS recusa N > 20; usar janela por datas |
 | Comex responde mas nada casa | O município vem por nome, não por código |
 | Workflow verde sem gravar dados | `git add` aborta inteiro se um dos caminhos não existir |
+| Percentual acima de 100% | Ao fatiar uma tabela com duas classificações, cruzar todas conta o mesmo domicílio mais de uma vez: fixe as outras no "Total" |
+
+O simulador (`npm run teste`) gera categorias que somam exatamente o "Total" —
+sem isso, um erro de razão passa despercebido no teste.
 
 ## Estrutura
 
