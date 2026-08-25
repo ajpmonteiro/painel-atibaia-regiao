@@ -1,0 +1,17 @@
+{
+  "name": "painel-atibaia-regiao",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Painel de desenvolvimento econômico de Atibaia/SP e municípios vizinhos, alimentado por dados públicos com coleta automática semanal.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "coleta": "node scripts/coleta.js",
+    "catalogo": "GERAR_CATALOGO=1 node scripts/coleta.js",
+    "artifact": "node scripts/build-artifact.js",
+    "servir": "node --run coleta && npx --yes serve docs",
+    "teste": "node --import ./scripts/stub-teste.mjs scripts/coleta.js"
+  }
+}

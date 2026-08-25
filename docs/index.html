@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atibaia e Região — Painel Econômico</title>
+<meta name="description" content="Painel interativo de desenvolvimento econômico de Atibaia/SP e municípios vizinhos, montado a partir de dados públicos com atualização automática.">
+<style>
+:root{
+  color-scheme: light;
+  --surface-1:#fcfcfb; --plane:#f9f9f7;
+  --ink-1:#0b0b0b; --ink-2:#52514e; --ink-3:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948;
+  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b; --up:#006300;
+  --seq-100:#cde2fb; --seq-250:#86b6ef; --seq-450:#2a78d6; --seq-650:#104281;
+  --radius:14px;
+  --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d;
+    --ink-1:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+    --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+    --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+    --up:#0ca30c;
+    --seq-100:#104281; --seq-250:#184f95; --seq-450:#3987e5; --seq-650:#9ec5f4;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --surface-1:#1a1a19; --plane:#0d0d0d;
+  --ink-1:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+  --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  --up:#0ca30c;
+  --seq-100:#104281; --seq-250:#184f95; --seq-450:#3987e5; --seq-650:#9ec5f4;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--plane); color:var(--ink-1);
+  font-family:var(--font); font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px; margin:0 auto; padding:0 20px 80px}
+a{color:var(--s1)}
+
+/* ---------- cabeçalho ---------- */
+header.topo{padding:40px 0 20px; border-bottom:1px solid var(--grid); margin-bottom:26px}
+.kicker{font-size:12px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+h1{font-size:clamp(26px,4vw,38px); line-height:1.15; margin:.35em 0 .3em; letter-spacing:-.02em}
+.sub{color:var(--ink-2); max-width:62ch; margin:0}
+.selo{display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:16px; font-size:12.5px; color:var(--ink-3)}
+.selo b{color:var(--ink-2); font-weight:600}
+
+/* ---------- controles ---------- */
+.barra{
+  position:sticky; top:0; z-index:30; background:var(--plane);
+  border-bottom:1px solid var(--grid); margin:0 -20px 26px; padding:10px 20px;
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+}
+.chip{
+  border:1px solid var(--ring); background:var(--surface-1); color:var(--ink-2);
+  border-radius:999px; padding:5px 12px; font-size:13px; font-family:inherit;
+  cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:.12s;
+}
+.chip:hover{border-color:var(--axis); color:var(--ink-1)}
+.chip[aria-pressed="true"]{border-color:currentColor; color:var(--ink-1); font-weight:600}
+.chip .pt{width:9px; height:9px; border-radius:3px; background:currentColor; flex:none}
+select,input[type=search]{
+  font-family:inherit; font-size:13px; padding:6px 10px; border-radius:9px;
+  border:1px solid var(--ring); background:var(--surface-1); color:var(--ink-1); max-width:100%;
+}
+label.campo{display:inline-flex; flex-direction:column; gap:3px; font-size:11px; color:var(--ink-3)}
+
+/* ---------- seções ---------- */
+section{margin:0 0 44px}
+h2{font-size:19px; margin:0 0 4px; letter-spacing:-.01em}
+h2 .num{color:var(--ink-3); font-weight:500; margin-right:8px}
+.desc{color:var(--ink-2); font-size:13.5px; margin:0 0 16px; max-width:70ch}
+
+.cartao{background:var(--surface-1); border:1px solid var(--ring); border-radius:var(--radius); padding:18px}
+.grade{display:grid; gap:14px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(400px,1fr))}
+
+/* ---------- stat tiles ---------- */
+.tile .rot{font-size:12px; color:var(--ink-3); font-weight:600; letter-spacing:.02em}
+.tile .val{font-size:29px; font-weight:650; letter-spacing:-.025em; margin:6px 0 2px; line-height:1.05}
+.tile .un{font-size:13px; color:var(--ink-2); font-weight:500}
+.tile .pe{font-size:12px; color:var(--ink-3); margin-top:6px; display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.pos{color:var(--up); font-weight:600}
+.neg{color:var(--crit); font-weight:600}
+.rank{border:1px solid var(--ring); border-radius:999px; padding:1px 8px; font-size:11px; font-weight:600; color:var(--ink-2)}
+
+/* ---------- gráficos ---------- */
+figure{margin:0}
+figcaption{font-size:13px; color:var(--ink-2); margin-bottom:10px}
+figcaption b{color:var(--ink-1); font-size:14.5px; display:block; font-weight:620; letter-spacing:-.01em}
+svg{display:block; width:100%; height:auto; overflow:visible}
+.gridline{stroke:var(--grid); stroke-width:1}
+.baseline{stroke:var(--axis); stroke-width:1}
+.tick{font-size:10.5px; fill:var(--ink-3)}
+.rotulo-serie{font-size:11px; font-weight:600}
+.legenda{display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:12px; color:var(--ink-2)}
+.legenda span.it{display:inline-flex; align-items:center; gap:6px}
+.legenda i{width:10px; height:10px; border-radius:3px; display:inline-block}
+
+.dica{
+  position:fixed; pointer-events:none; opacity:0; z-index:60; transition:opacity .1s;
+  background:var(--surface-1); border:1px solid var(--ring); border-radius:10px;
+  padding:9px 11px; font-size:12.5px; box-shadow:0 6px 24px rgba(0,0,0,.14); min-width:150px;
+}
+.dica .t{font-weight:650; margin-bottom:5px; font-size:12px; color:var(--ink-1)}
+.dica .l{display:flex; justify-content:space-between; gap:14px; color:var(--ink-2); line-height:1.7}
+.dica .l b{color:var(--ink-1); font-variant-numeric:tabular-nums; font-weight:600}
+.dica .l i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
+
+/* ---------- tabela ---------- */
+.rolagem{overflow-x:auto; -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse; width:100%; font-size:12.5px; font-variant-numeric:tabular-nums}
+th,td{padding:7px 10px; text-align:right; border-bottom:1px solid var(--grid); white-space:nowrap}
+th:first-child,td:first-child{text-align:left; white-space:normal; min-width:230px; position:sticky; left:0; background:var(--surface-1)}
+thead th{color:var(--ink-3); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; position:sticky; top:0; background:var(--surface-1)}
+tbody tr:hover td{background:color-mix(in srgb, var(--s1) 6%, transparent)}
+td.destaque{font-weight:700; color:var(--ink-1)}
+.melhor{color:var(--up); font-weight:650}
+
+.fonte{font-size:11.5px; color:var(--ink-3); margin-top:10px}
+.fonte a{color:var(--ink-3)}
+details{border-top:1px solid var(--grid); padding:12px 0}
+summary{cursor:pointer; font-weight:600; font-size:14px}
+.vazio{color:var(--ink-3); font-size:13px; padding:24px; text-align:center}
+.aviso{border-left:3px solid var(--warn); padding:10px 14px; background:var(--surface-1); border-radius:0 10px 10px 0; font-size:13px; color:var(--ink-2); margin-bottom:18px}
+footer{border-top:1px solid var(--grid); padding-top:20px; color:var(--ink-3); font-size:12.5px}
+@media (max-width:640px){ .barra{position:static} .tile .val{font-size:25px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topo">
+    <div class="kicker">Dados públicos · atualização automática</div>
+    <h1>Atibaia e região: o retrato econômico</h1>
+    <p class="sub">Oito municípios do entorno imediato de Atibaia comparados em demografia, produto,
+    estrutura produtiva, empresas, finanças públicas e comércio exterior — sempre com o dado mais
+    recente publicado pelas fontes oficiais.</p>
+    <div class="selo" id="selo"></div>
+  </header>
+
+  <div class="barra">
+    <label class="campo">Município em destaque
+      <select id="selMun"></select>
+    </label>
+    <label class="campo">Ano de referência
+      <select id="selAno"></select>
+    </label>
+    <span id="chipsMun" style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end"></span>
+  </div>
+
+  <div id="conteudo"></div>
+
+  <footer>
+    <p id="rodape"></p>
+  </footer>
+</div>
+<div class="dica" id="dica" role="tooltip" aria-hidden="true"></div>
+<script src="app.js" type="module"></script>
+</body>
+</html>
