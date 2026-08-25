@@ -1,0 +1,66 @@
+name: Coleta de dados públicos
+
+on:
+  schedule:
+    # Toda segunda-feira às 09:00 UTC (06:00 em Brasília)
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      catalogo:
+        description: 'Gerar também o catálogo de agregados municipais do IBGE'
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/coleta.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: coleta
+  cancel-in-progress: false
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Executar coleta
+        env:
+          GERAR_CATALOGO: ${{ inputs.catalogo && '1' || '0' }}
+        run: node scripts/coleta.js
+
+      - name: Resumo das fontes
+        if: always()
+        run: |
+          if [ -f docs/diagnostico.json ]; then
+            node -e "
+              const d=require('./docs/diagnostico.json');
+              console.log('| Fonte | OK | Detalhe |');
+              console.log('|---|---|---|');
+              for (const f of d.diagnostico) {
+                console.log('| '+(f.fonte||'')+' — '+(f.rotulo||'')+' | '+(f.ok?'✅':'❌')+' | '+(f.erro||f.indicadores||f.registros||f.series||'')+' |');
+              }
+            " >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Publicar dados atualizados
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/dados.json docs/diagnostico.json docs/catalogo-ibge.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "Sem mudanças nos dados."
+          else
+            git commit -m "dados: atualização automática $(date -u +'%Y-%m-%d')"
+            git push
+          fi
