@@ -27,10 +27,17 @@ const META = {
   6804: { nome: 'Abastecimento de água', vars: [[381, 'Domicílios particulares permanentes ocupados', 'Domicílios']],
     cls: [[11558, [[0, 'Total'], [96, 'Rede geral de distribuição'], [97, 'Poço profundo'], [98, 'Outra']], 'Principal forma de abastecimento de água'],
           [11559, [[0, 'Total'], [1, 'Com canalização'], [2, 'Sem canalização']], 'Existência de canalização']] },
+  // Categorias hierárquicas: o pai está no nível 0 e os filhos no nível 1 — somar
+  // os dois conta o mesmo domicílio duas vezes, que foi o bug de 25/08/2026.
   6805: { nome: 'Esgotamento sanitário', vars: [[381, 'Domicílios particulares permanentes ocupados', 'Domicílios']],
-    cls: [[11560, [[0, 'Total'], [11, 'Rede geral ou pluvial'], [12, 'Fossa séptica'], [13, 'Vala']], 'Tipo de esgotamento sanitário']] },
+    cls: [[11560, [[0, 'Total', 0], [11, 'Rede geral, rede pluvial ou fossa ligada à rede', 0],
+                   [111, 'Rede geral ou pluvial', 1], [112, 'Fossa séptica ligada à rede', 1],
+                   [12, 'Fossa rudimentar ou buraco', 0], [13, 'Vala', 0]], 'Tipo de esgotamento sanitário']] },
   6892: { nome: 'Destino do lixo', vars: [[381, 'Domicílios particulares permanentes ocupados', 'Domicílios']],
-    cls: [[11561, [[0, 'Total'], [21, 'Coletado por serviço de limpeza'], [22, 'Queimado'], [23, 'Outro destino']], 'Destino do lixo']] },
+    cls: [[11561, [[0, 'Total', 0], [21, 'Coletado', 0],
+                   [211, 'Coletado no domicílio por serviço de limpeza', 1],
+                   [212, 'Depositado em caçamba de serviço de limpeza', 1],
+                   [22, 'Queimado na propriedade', 0], [23, 'Outro destino', 0]], 'Destino do lixo']] },
   2612: { nome: 'Registro civil', vars: [[218, 'Número de nascidos vivos', 'Unidades']], cls: [[2, [[4, 'Total'], [5, 'Homens']]]] },
 };
 
@@ -99,7 +106,7 @@ globalThis.fetch = async (url, opts = {}) => {
     return jsonRes({
       id: Number(m[1]), nome: t.nome, periodicidade: { frequencia: 'anual', inicio: 2010, fim: 2024 },
       variaveis: t.vars.map(([id, nome, unidade]) => ({ id, nome, unidade, sumarizacao: [] })),
-      classificacoes: t.cls.map(([id, cats, nomeCls]) => ({ id, nome: nomeCls || 'classe', categorias: cats.map(([cid, cnome]) => ({ id: cid, nome: cnome, nivel: 0 })) })),
+      classificacoes: t.cls.map(([id, cats, nomeCls]) => ({ id, nome: nomeCls || 'classe', categorias: cats.map(([cid, cnome, nivel]) => ({ id: cid, nome: cnome, nivel: nivel || 0 })) })),
     });
   }
 

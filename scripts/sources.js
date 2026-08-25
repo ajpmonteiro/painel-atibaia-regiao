@@ -142,17 +142,17 @@ export const TABELAS_IBGE = [
 
   { chave: 'agua', agg: 6804, periodos: '-1', grupo: 'Infraestrutura urbana',
     rotulo: 'Censo 2022 — abastecimento de água', fonte: 'IBGE — Censo Demográfico 2022',
-    fatia: { classificacao: /abastecimento/i, destaque: /rede geral/i,
+    fatia: { classificacao: /abastecimento/i, destaque: /^rede geral/i,
              rotulo: 'Domicílios com água de rede geral' } },
 
   { chave: 'esgoto', agg: 6805, periodos: '-1', grupo: 'Infraestrutura urbana',
     rotulo: 'Censo 2022 — esgotamento sanitário', fonte: 'IBGE — Censo Demográfico 2022',
-    fatia: { classificacao: /esgotamento/i, destaque: /rede geral|pluvial/i,
-             rotulo: 'Domicílios ligados à rede de esgoto ou pluvial' } },
+    fatia: { classificacao: /esgotamento/i, destaque: /^rede geral/i,
+             rotulo: 'Domicílios com esgotamento adequado (rede geral, pluvial ou fossa ligada à rede)' } },
 
   { chave: 'lixo', agg: 6892, periodos: '-1', grupo: 'Infraestrutura urbana',
     rotulo: 'Censo 2022 — destino do lixo', fonte: 'IBGE — Censo Demográfico 2022',
-    fatia: { classificacao: /lixo/i, destaque: /coletado/i,
+    fatia: { classificacao: /lixo/i, destaque: /^coletado$/i,
              rotulo: 'Domicílios com coleta de lixo' } },
 
   { chave: 'registro', agg: 2612, periodos: '-8', grupo: 'Demografia',
@@ -225,6 +225,7 @@ export async function coletarIBGE(municipios, log) {
       let classificacao = null;
       let temaId = null;
       let temaEscolhido = null;
+      const somadas = [];
       if (t.apenasTotal) classificacao = classificacaoTotal(meta);
       else if (t.somaCategorias) classificacao = classificacaoTudo(meta);
       else if (t.fatia) {
@@ -241,19 +242,30 @@ export async function coletarIBGE(municipios, log) {
 
       let criados = 0;
       if (t.fatia) {
-        // Uma categoria em destaque (ex.: "Rede geral") e o total, para virar
-        // valor absoluto + percentual — que é como esse dado se lê.
+        // As categorias do IBGE são hierárquicas: "Coletado" contém "Coletado no
+        // domicílio..." e "Depositado em caçamba...". Somar pai e filhos conta o
+        // mesmo domicílio duas vezes — por isso só o nível mais alto entra na conta.
+        const clsTema = (meta.classificacoes || []).find((c) => String(c.id) === temaId);
+        const semTotal = (clsTema?.categorias || []).filter((k) => norm(k.nome) !== 'total');
+        const nivelTopo = Math.min(...semTotal.map((k) => k.nivel ?? 0));
+        const doTopo = new Set(
+          semTotal.filter((k) => (k.nivel ?? 0) === nivelTopo).map((k) => norm(k.nome))
+        );
         const porVar = new Map();
         for (const b of blocos) {
           if (/%|percentual/i.test(b.unidade || '')) continue;
           const nomeCat = b.catMap?.[temaId];
           if (!nomeCat) continue;
+          if (norm(nomeCat) !== 'total' && !doTopo.has(norm(nomeCat))) continue;
           if (!porVar.has(b.variavelId)) porVar.set(b.variavelId, { ref: b, total: null, destaque: null, soma: null });
           const g = porVar.get(b.variavelId);
           if (norm(nomeCat) === 'total') g.total = b.valores;
           else {
             g.soma = somarValores(g.soma, b);
-            if (t.fatia.destaque.test(nomeCat)) g.destaque = somarValores(g.destaque, b);
+            if (t.fatia.destaque.test(nomeCat)) {
+              g.destaque = somarValores(g.destaque, b);
+              if (!somadas.includes(nomeCat)) somadas.push(nomeCat);
+            }
           }
         }
         for (const [varId, g] of porVar) {
@@ -269,6 +281,13 @@ export async function coletarIBGE(municipios, log) {
               pct[cod][per] = (val / den) * 100;
               periodos.add(per);
             }
+          }
+          // Uma parte não pode ser maior que o todo: se for, algo na hierarquia de
+          // categorias mudou e é melhor não publicar do que publicar errado.
+          const maior = Math.max(0, ...Object.values(pct).flatMap((v) => Object.values(v)));
+          if (maior > 100.5) {
+            log?.(`IBGE ${t.agg}: percentual de ${maior.toFixed(1)}% — categorias somadas: ${somadas.join(' + ')}. Indicador descartado.`);
+            continue;
           }
           const base = { grupo: t.grupo, tabela: t.rotulo, fonte: t.fonte,
             fonteUrl: `https://sidra.ibge.gov.br/tabela/${t.agg}` };
@@ -311,6 +330,7 @@ export async function coletarIBGE(municipios, log) {
         categoriasVistas: t.fatia
           ? [...new Set(blocos.map((b) => b.catMap?.[temaId]).filter(Boolean))].slice(0, 20)
           : undefined,
+        categoriasSomadas: t.fatia ? somadas : undefined,
       });
       log?.(`IBGE ${t.agg} (${t.rotulo}): ${criados} indicadores`);
     } catch (e) {
