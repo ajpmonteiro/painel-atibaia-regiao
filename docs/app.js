@@ -542,6 +542,24 @@ function secFinancas() {
     g);
 }
 
+/* --- infraestrutura urbana --- */
+function secInfra() {
+  const pcts = Object.values(D.indicadores)
+    .filter((i) => i.grupo === 'Infraestrutura urbana' && i.unidade === '%');
+  if (!pcts.length) return null;
+  const g = el('div', { class: 'grade g2' });
+  for (const i of pcts) {
+    const a = ultimoAno(i);
+    const curto = i.rotulo.replace(/ — % do total$/, '').replace(/^Domicílios /, 'Domicílios ');
+    g.appendChild(cartaoGrafico(curto,
+      `<span style="color:var(--ink-3)">% dos domicílios · Censo ${a} · IBGE</span>`,
+      grafBarras(i, a, { largura: 540 })));
+  }
+  return bloco('Infraestrutura urbana',
+    'Água encanada, esgoto tratado e coleta de lixo são o retrato mais direto de quanto a urbanização acompanhou o crescimento — e o que mais separa as cidades desta região.',
+    g);
+}
+
 /* --- 6. comércio exterior --- */
 function secComex() {
   const exp = ind('comex_export_fob'), imp = ind('comex_import_fob'), sal = ind('der_saldo_comercial');
@@ -693,7 +711,7 @@ function render() {
   const c = $('#conteudo');
   c.innerHTML = '';
   const secoes = [secPanorama(), secComparativo(), secEvolucao(), secEstrutura(),
-    secFinancas(), secComex(), secMacro(), secTabela(), secFontes()].filter(Boolean);
+    secInfra(), secFinancas(), secComex(), secMacro(), secTabela(), secFontes()].filter(Boolean);
   secoes.forEach((s) => c.appendChild(s));
 }
 
