@@ -29,6 +29,9 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Histórico completo: o rebase antes do push não funciona em clone raso.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -64,7 +67,18 @@ jobs:
           git add -A docs
           if git diff --staged --quiet; then
             echo "Sem mudanças nos dados."
-          else
-            git commit -m "dados: atualização automática $(date -u +'%Y-%m-%d')"
-            git push
+            exit 0
           fi
+          git commit -m "dados: atualização automática $(date -u +'%Y-%m-%d %H:%M')"
+          # O repositório pode ter avançado enquanto a coleta rodava — um envio pela
+          # web, por exemplo. Sem isto o push é rejeitado e a coleta inteira se perde.
+          for tentativa in 1 2 3; do
+            if git pull --rebase --autostash origin "$GITHUB_REF_NAME" && git push; then
+              echo "Dados publicados (tentativa $tentativa)."
+              exit 0
+            fi
+            echo "Push rejeitado; nova tentativa em 10s ($tentativa/3)."
+            sleep 10
+          done
+          echo "Não foi possível publicar os dados após 3 tentativas."
+          exit 1
