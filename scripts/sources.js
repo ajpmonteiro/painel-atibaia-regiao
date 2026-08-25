@@ -53,10 +53,12 @@ export async function ibgeValores({ agg, variaveis, periodos = '-1', localidades
   const out = [];
   for (const v of json || []) {
     for (const r of v.resultados || []) {
-      const cat = (r.classificacoes || [])
-        .map((c) => Object.values(c.categoria || {})[0])
-        .filter(Boolean)
-        .join(' / ');
+      const catMap = {};
+      for (const c of r.classificacoes || []) {
+        const nome = Object.values(c.categoria || {})[0];
+        if (nome) catMap[String(c.id)] = nome;
+      }
+      const cat = Object.values(catMap).filter(Boolean).join(' / ');
       const valores = {};
       for (const s of r.series || []) {
         const cod = String(s.localidade?.id);
@@ -72,6 +74,7 @@ export async function ibgeValores({ agg, variaveis, periodos = '-1', localidades
         variavel: v.variavel,
         unidade: v.unidade,
         categoria: cat || null,
+        catMap,
         valores,
       });
     }
@@ -105,6 +108,24 @@ export const TABELAS_IBGE = [
     // Rendimento médio é uma razão: somá-lo entre culturas não produz nada.
     excluir: /percentual do total geral|rendimento m[ée]dio/i },
 
+  { chave: 'crescimento', agg: 4709, periodos: '-1', grupo: 'Demografia',
+    rotulo: 'Censo 2022 — variação e taxa de crescimento', fonte: 'IBGE — Censo Demográfico 2022' },
+
+  { chave: 'agua', agg: 6804, periodos: '-1', grupo: 'Infraestrutura urbana',
+    rotulo: 'Censo 2022 — abastecimento de água', fonte: 'IBGE — Censo Demográfico 2022',
+    fatia: { classificacao: /abastecimento/i, destaque: /rede geral/i,
+             rotulo: 'Domicílios com água de rede geral' } },
+
+  { chave: 'esgoto', agg: 6805, periodos: '-1', grupo: 'Infraestrutura urbana',
+    rotulo: 'Censo 2022 — esgotamento sanitário', fonte: 'IBGE — Censo Demográfico 2022',
+    fatia: { classificacao: /esgotamento/i, destaque: /rede geral|pluvial/i,
+             rotulo: 'Domicílios ligados à rede de esgoto ou pluvial' } },
+
+  { chave: 'lixo', agg: 6892, periodos: '-1', grupo: 'Infraestrutura urbana',
+    rotulo: 'Censo 2022 — destino do lixo', fonte: 'IBGE — Censo Demográfico 2022',
+    fatia: { classificacao: /lixo/i, destaque: /coletado/i,
+             rotulo: 'Domicílios com coleta de lixo' } },
+
   { chave: 'registro', agg: 2612, periodos: '-8', grupo: 'Demografia',
     rotulo: 'Nascidos vivos — Registro Civil', fonte: 'IBGE — Estatísticas do Registro Civil',
     apenasTotal: true, excluir: /percentual do total geral/i },
@@ -118,6 +139,39 @@ function classificacaoTotal(meta) {
     if (total) partes.push(`${c.id}[${total.id}]`);
   }
   return partes.length ? partes.join('|') : null;
+}
+
+/**
+ * Uma classificação é o tema (todas as categorias); as demais ficam no "Total",
+ * para não multiplicar o cruzamento e contar o mesmo domicílio duas vezes.
+ */
+function classificacaoFatia(meta, re) {
+  const cls = meta.classificacoes || [];
+  if (!cls.length) return { spec: null, temaId: null };
+  // Escolha do tema, em ordem de confiança: nome bate com o esperado; é a única
+  // classificação; ou é a que tem mais categorias. O nome das classificações não
+  // é estável entre tabelas do IBGE — por isso os dois planos B.
+  let tema = cls.find((c) => re.test(c.nome || ''));
+  if (!tema && cls.length === 1) tema = cls[0];
+  if (!tema) tema = [...cls].sort((a, b) => (b.categorias?.length || 0) - (a.categorias?.length || 0))[0];
+
+  const partes = [];
+  for (const c of cls) {
+    if (String(c.id) === String(tema.id)) { partes.push(`${c.id}[all]`); continue; }
+    const total = (c.categorias || []).find((k) => norm(k.nome) === 'total');
+    partes.push(`${c.id}[${total ? total.id : 'all'}]`);
+  }
+  return { spec: partes.join('|'), temaId: String(tema.id), temaNome: tema.nome };
+}
+
+/** Soma, célula a célula, os valores de dois blocos. */
+function somarValores(acc, b) {
+  const out = acc || {};
+  for (const [cod, serie] of Object.entries(b.valores)) {
+    out[cod] = out[cod] || {};
+    for (const [per, val] of Object.entries(serie)) out[cod][per] = (out[cod][per] || 0) + val;
+  }
+  return out;
 }
 
 function classificacaoTudo(meta) {
@@ -140,15 +194,67 @@ export async function coletarIBGE(municipios, log) {
       if (!variaveis.length) throw new Error('metadados sem variaveis utilizáveis');
 
       let classificacao = null;
+      let temaId = null;
+      let temaEscolhido = null;
       if (t.apenasTotal) classificacao = classificacaoTotal(meta);
       else if (t.somaCategorias) classificacao = classificacaoTudo(meta);
+      else if (t.fatia) {
+        const f = classificacaoFatia(meta, t.fatia.classificacao);
+        classificacao = f.spec;
+        temaId = f.temaId;
+        if (!temaId) throw new Error('tabela sem classificação para fatiar');
+        temaEscolhido = f.temaNome;
+      }
 
       const blocos = await ibgeValores({
         agg: t.agg, variaveis, periodos: t.periodos, localidades: codigos, classificacao,
       });
 
       let criados = 0;
-      if (t.somaCategorias) {
+      if (t.fatia) {
+        // Uma categoria em destaque (ex.: "Rede geral") e o total, para virar
+        // valor absoluto + percentual — que é como esse dado se lê.
+        const porVar = new Map();
+        for (const b of blocos) {
+          if (/%|percentual/i.test(b.unidade || '')) continue;
+          const nomeCat = b.catMap?.[temaId];
+          if (!nomeCat) continue;
+          if (!porVar.has(b.variavelId)) porVar.set(b.variavelId, { ref: b, total: null, destaque: null, soma: null });
+          const g = porVar.get(b.variavelId);
+          if (norm(nomeCat) === 'total') g.total = b.valores;
+          else {
+            g.soma = somarValores(g.soma, b);
+            if (t.fatia.destaque.test(nomeCat)) g.destaque = somarValores(g.destaque, b);
+          }
+        }
+        for (const [varId, g] of porVar) {
+          if (!g.destaque) continue;
+          const denominador = g.total || g.soma;
+          const periodos = new Set();
+          const pct = {};
+          for (const [cod, serie] of Object.entries(g.destaque)) {
+            for (const [per, val] of Object.entries(serie)) {
+              const den = denominador?.[cod]?.[per];
+              if (!den) continue;
+              pct[cod] = pct[cod] || {};
+              pct[cod][per] = (val / den) * 100;
+              periodos.add(per);
+            }
+          }
+          const base = { grupo: t.grupo, tabela: t.rotulo, fonte: t.fonte,
+            fonteUrl: `https://sidra.ibge.gov.br/tabela/${t.agg}` };
+          const idAbs = `ibge_${t.chave}_${varId}`;
+          indicadores[idAbs] = { id: idAbs, rotulo: t.fatia.rotulo, unidade: g.ref.unidade,
+            ...base, periodos: [...periodos].sort(), valores: g.destaque };
+          criados++;
+          if (Object.keys(pct).length) {
+            const idPct = `ibge_${t.chave}_${varId}_pct`;
+            indicadores[idPct] = { id: idPct, rotulo: `${t.fatia.rotulo} — % do total`,
+              unidade: '%', ...base, periodos: [...periodos].sort(), valores: pct };
+            criados++;
+          }
+        }
+      } else if (t.somaCategorias) {
         // Agrega todas as categorias por variavel
         const porVar = new Map();
         for (const b of blocos) {
@@ -172,6 +278,10 @@ export async function coletarIBGE(municipios, log) {
       diagnostico.push({
         fonte: `IBGE ${t.agg}`, rotulo: t.rotulo, ok: criados > 0, indicadores: criados,
         nomeTabela: meta.nome, periodicidade: meta.periodicidade, ms: Date.now() - t0,
+        classificacaoUsada: temaEscolhido || undefined,
+        categoriasVistas: t.fatia
+          ? [...new Set(blocos.map((b) => b.catMap?.[temaId]).filter(Boolean))].slice(0, 20)
+          : undefined,
       });
       log?.(`IBGE ${t.agg} (${t.rotulo}): ${criados} indicadores`);
     } catch (e) {
@@ -564,67 +674,20 @@ export async function coletarMacro(log) {
 }
 
 /* ------------------------------------------------------------------ */
-/* ANEEL - consumo de energia por municipio (em avaliacao)             */
+/* ANEEL - verificada e descartada                                     */
 /* ------------------------------------------------------------------ */
 
-/**
- * Consumo mensal de energia é o melhor termômetro de atividade econômica local
- * que falta ao painel, mas o portal da ANEEL reorganiza os conjuntos e muda os
- * nomes dos recursos. Esta rodada é de reconhecimento: registra SEM FILTRAR o que
- * o catálogo devolve, para que a extração seja fixada no recurso certo na próxima.
- * (A versão anterior filtrava por título antes de registrar e, quando nada casava,
- * descartava justamente a informação necessária para corrigir.)
+/*
+ * O consumo mensal de energia por município seria o único indicador de frequência
+ * mensal e recorte local do painel. A rodada de reconhecimento de 25/08/2026 leu o
+ * catálogo inteiro do portal de dados abertos da ANEEL: 72 conjuntos, nenhum com
+ * consumo por município. O mais próximo é o SAMP (Sistema de Acompanhamento de
+ * Informações de Mercado), cujo recorte é a distribuidora — que atende dezenas de
+ * municípios e não permite atribuir consumo a nenhum deles. Os demais conjuntos são
+ * de tarifas, qualidade, interrupções, geração e subsídios.
+ *
+ * Conclusão: a fonte foi removida do pipeline em vez de permanecer como uma linha
+ * permanentemente vermelha no diagnóstico. Consumo municipal de energia é publicado
+ * pela EPE (Empresa de Pesquisa Energética), em planilhas do Anuário Estatístico,
+ * sem API — o que exigiria um raspador, não um cliente de API.
  */
-export async function coletarAneel(municipios, log) {
-  const conjuntos = [];
-  const recursos = [];
-  const erros = [];
-  let totalConjuntos = null;
-
-  // 1) Catálogo completo: só os nomes, para saber o que existe.
-  try {
-    const j = await httpGet('https://dadosabertos.aneel.gov.br/api/3/action/package_list',
-      { timeout: 60000 });
-    const nomes = j?.result || [];
-    totalConjuntos = nomes.length;
-    const provaveis = nomes.filter((n) => /consum|energ|mercado|distribuid|tarif/i.test(n));
-    conjuntos.push(...(provaveis.length ? provaveis : nomes).slice(0, 60));
-  } catch (e) {
-    erros.push(`package_list: ${String(e.message || e).slice(0, 140)}`);
-  }
-  await sleep(600);
-
-  // 2) Busca por consumo: títulos e recursos, registrados como vierem.
-  for (const q of ['consumo', 'consumo+energia+municipio']) {
-    try {
-      const j = await httpGet(
-        `https://dadosabertos.aneel.gov.br/api/3/action/package_search?q=${q}&rows=10`,
-        { timeout: 60000 }
-      );
-      for (const p of j?.result?.results || []) {
-        for (const r of (p.resources || []).slice(0, 4)) {
-          recursos.push({
-            pacote: String(p.title || p.name || '').slice(0, 90),
-            recurso: String(r.name || '').slice(0, 90),
-            formato: r.format, datastore: !!r.datastore_active, id: r.id,
-          });
-        }
-      }
-    } catch (e) {
-      erros.push(`package_search ${q}: ${String(e.message || e).slice(0, 140)}`);
-    }
-    await sleep(600);
-  }
-
-  log?.(`ANEEL: ${totalConjuntos ?? '?'} conjuntos no catálogo, ${recursos.length} recursos inspecionados`);
-  return {
-    indicadores: {},
-    diagnostico: [{
-      fonte: 'ANEEL — Dados Abertos', rotulo: 'consumo de energia elétrica',
-      ok: false, experimental: true,
-      nota: 'Rodada de reconhecimento: o catálogo abaixo é o que falta para fixar a extração.',
-      totalConjuntos, erros: erros.length ? erros : undefined,
-      conjuntos, recursos: recursos.slice(0, 30),
-    }],
-  };
-}

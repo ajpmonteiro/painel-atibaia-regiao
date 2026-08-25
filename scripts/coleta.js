@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   resolverMunicipios, coletarIBGE, coletarSiconfi, coletarComex,
-  coletarMacro, coletarAneel, catalogoIBGE,
+  coletarMacro, catalogoIBGE,
 } from './sources.js';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -31,7 +31,6 @@ async function principal() {
     coletarSiconfi(municipios, log),
     coletarComex(municipios, log),
     coletarMacro(log),
-    coletarAneel(municipios, log),
   ]);
 
   const indicadores = {};

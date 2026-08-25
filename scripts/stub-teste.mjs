@@ -23,6 +23,14 @@ const META = {
   5457: { nome: 'PAM', vars: [[214, 'Quantidade produzida', 'Toneladas'], [215, 'Valor da produção', 'Mil Reais']],
     cls: [[782, [[0, 'Total'], [40099, 'Café'], [2717, 'Uva']]]] },
   3939: { nome: 'PPM', vars: [[105, 'Efetivo dos rebanhos', 'Cabeças']], cls: [[79, [[2670, 'Bovino'], [2681, 'Galináceos']]]] },
+  4709: { nome: 'Censo 2022 crescimento', vars: [[93, 'População residente', 'Pessoas'], [10605, 'Taxa de crescimento geométrico', '% ao ano']], cls: [] },
+  6804: { nome: 'Abastecimento de água', vars: [[381, 'Domicílios particulares permanentes ocupados', 'Domicílios']],
+    cls: [[11558, [[0, 'Total'], [96, 'Rede geral de distribuição'], [97, 'Poço profundo'], [98, 'Outra']], 'Principal forma de abastecimento de água'],
+          [11559, [[0, 'Total'], [1, 'Com canalização'], [2, 'Sem canalização']], 'Existência de canalização']] },
+  6805: { nome: 'Esgotamento sanitário', vars: [[381, 'Domicílios particulares permanentes ocupados', 'Domicílios']],
+    cls: [[11560, [[0, 'Total'], [11, 'Rede geral ou pluvial'], [12, 'Fossa séptica'], [13, 'Vala']], 'Tipo de esgotamento sanitário']] },
+  6892: { nome: 'Destino do lixo', vars: [[381, 'Domicílios particulares permanentes ocupados', 'Domicílios']],
+    cls: [[11561, [[0, 'Total'], [21, 'Coletado por serviço de limpeza'], [22, 'Queimado'], [23, 'Outro destino']], 'Destino do lixo']] },
   2612: { nome: 'Registro civil', vars: [[218, 'Número de nascidos vivos', 'Unidades']], cls: [[2, [[4, 'Total'], [5, 'Homens']]]] },
 };
 
@@ -31,14 +39,35 @@ const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648
 
 function serieAnos(ini, fim) { const a = []; for (let y = ini; y <= fim; y++) a.push(String(y)); return a; }
 
+/**
+ * Gera valores coerentes: quando a classificação tem "Total", ele é exatamente a
+ * soma das demais categorias — senão o teste não consegue validar percentuais.
+ */
 function valoresV3(agg, varId, periodos, cats) {
   const resultados = [];
   const listaCats = cats.length ? cats : [null];
+  const semTotal = listaCats.filter((c) => c && norm(c.nome) !== 'total');
+  // Frações fixas por categoria, normalizadas para somar 1.
+  const brutos = semTotal.map((_, i) => 1 / (i + 1.5));
+  const somaBrutos = brutos.reduce((a, b) => a + b, 0) || 1;
+  const fracoes = brutos.map((b) => b / somaBrutos);
+
+  const base = {};
+  for (const [cod] of MUNS) {
+    base[cod] = {};
+    const b = 1000 * (1 + rnd() * 40);
+    periodos.forEach((p, i) => { base[cod][p] = Math.round(b * Math.pow(1.05, i)); });
+  }
+
   for (const cat of listaCats) {
+    const ehTotal = !cat || norm(cat.nome) === 'total';
+    const idx = ehTotal ? -1 : semTotal.findIndex((c) => c.id === cat.id);
     const series = MUNS.map(([cod]) => {
-      const base = 1000 * (1 + rnd() * 40);
       const serie = {};
-      periodos.forEach((p, i) => { serie[p] = String(Math.round(base * Math.pow(1.05, i))); });
+      for (const p of periodos) {
+        const total = base[cod][p];
+        serie[p] = String(ehTotal ? total : Math.round(total * fracoes[idx]));
+      }
       return { localidade: { id: String(cod), nivel: { id: 'N6' }, nome: 'x' }, serie };
     });
     resultados.push({
@@ -48,6 +77,8 @@ function valoresV3(agg, varId, periodos, cats) {
   }
   return resultados;
 }
+
+const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
 const jsonRes = (obj) => new Response(JSON.stringify(obj), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
@@ -68,7 +99,7 @@ globalThis.fetch = async (url, opts = {}) => {
     return jsonRes({
       id: Number(m[1]), nome: t.nome, periodicidade: { frequencia: 'anual', inicio: 2010, fim: 2024 },
       variaveis: t.vars.map(([id, nome, unidade]) => ({ id, nome, unidade, sumarizacao: [] })),
-      classificacoes: t.cls.map(([id, cats]) => ({ id, nome: 'classe', categorias: cats.map(([cid, cnome]) => ({ id: cid, nome: cnome, nivel: 0 })) })),
+      classificacoes: t.cls.map(([id, cats, nomeCls]) => ({ id, nome: nomeCls || 'classe', categorias: cats.map(([cid, cnome]) => ({ id: cid, nome: cnome, nivel: 0 })) })),
     });
   }
 
