@@ -3,8 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Atibaia e Região — Painel Econômico</title>
+<title>Retrato Econômico de Atibaia</title>
 <meta name="description" content="Painel interativo de desenvolvimento econômico de Atibaia/SP e municípios vizinhos, montado a partir de dados públicos com atualização automática.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
 <style>
 :root{
   color-scheme: light;
@@ -16,7 +19,11 @@
   --good:#0ca30c; --warn:#fab219; --crit:#d03b3b; --up:#006300;
   --seq-100:#cde2fb; --seq-250:#86b6ef; --seq-450:#2a78d6; --seq-650:#104281;
   --radius:14px;
-  --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Newsreader dá voz editorial aos títulos; Plex Sans conduz a interface;
+     Plex Mono alinha os números, que são o conteúdo real desta página. */
+  --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-titulo: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -49,14 +56,17 @@ body{
 }
 .wrap{max-width:1180px; margin:0 auto; padding:0 20px 80px}
 a{color:var(--s1)}
+:focus-visible{outline:2px solid var(--s1); outline-offset:2px; border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{transition:none !important; animation:none !important}}
 
 /* ---------- cabeçalho ---------- */
 header.topo{padding:40px 0 20px; border-bottom:1px solid var(--grid); margin-bottom:26px}
 .kicker{font-size:12px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
-h1{font-size:clamp(26px,4vw,38px); line-height:1.15; margin:.35em 0 .3em; letter-spacing:-.02em}
+h1{font-family:var(--font-titulo); font-weight:500; font-size:clamp(30px,4.8vw,48px);
+   line-height:1.08; margin:.3em 0 .32em; letter-spacing:-.015em; text-wrap:balance}
 .sub{color:var(--ink-2); max-width:62ch; margin:0}
-.selo{display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:16px; font-size:12.5px; color:var(--ink-3)}
-.selo b{color:var(--ink-2); font-weight:600}
+.selo{display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:18px; font-size:12.5px; color:var(--ink-3)}
+.selo b{color:var(--ink-2); font-weight:600; font-family:var(--font-num); font-variant-numeric:tabular-nums}
 
 /* ---------- controles ---------- */
 .barra{
@@ -80,8 +90,8 @@ label.campo{display:inline-flex; flex-direction:column; gap:3px; font-size:11px;
 
 /* ---------- seções ---------- */
 section{margin:0 0 44px}
-h2{font-size:19px; margin:0 0 4px; letter-spacing:-.01em}
-h2 .num{color:var(--ink-3); font-weight:500; margin-right:8px}
+h2{font-family:var(--font-titulo); font-weight:600; font-size:23px; margin:0 0 5px;
+   letter-spacing:-.01em; text-wrap:balance}
 .desc{color:var(--ink-2); font-size:13.5px; margin:0 0 16px; max-width:70ch}
 
 .cartao{background:var(--surface-1); border:1px solid var(--ring); border-radius:var(--radius); padding:18px}
@@ -91,7 +101,8 @@ h2 .num{color:var(--ink-3); font-weight:500; margin-right:8px}
 
 /* ---------- stat tiles ---------- */
 .tile .rot{font-size:12px; color:var(--ink-3); font-weight:600; letter-spacing:.02em}
-.tile .val{font-size:29px; font-weight:650; letter-spacing:-.025em; margin:6px 0 2px; line-height:1.05}
+.tile .val{font-family:var(--font-num); font-size:27px; font-weight:500; letter-spacing:-.03em;
+  margin:7px 0 2px; line-height:1.05; font-variant-numeric:tabular-nums}
 .tile .un{font-size:13px; color:var(--ink-2); font-weight:500}
 .tile .pe{font-size:12px; color:var(--ink-3); margin-top:6px; display:flex; gap:10px; flex-wrap:wrap; align-items:center}
 .pos{color:var(--up); font-weight:600}
@@ -101,11 +112,12 @@ h2 .num{color:var(--ink-3); font-weight:500; margin-right:8px}
 /* ---------- gráficos ---------- */
 figure{margin:0}
 figcaption{font-size:13px; color:var(--ink-2); margin-bottom:10px}
-figcaption b{color:var(--ink-1); font-size:14.5px; display:block; font-weight:620; letter-spacing:-.01em}
+figcaption b{color:var(--ink-1); font-family:var(--font-titulo); font-size:17px; display:block;
+  font-weight:600; letter-spacing:-.005em; margin-bottom:1px}
 svg{display:block; width:100%; height:auto; overflow:visible}
 .gridline{stroke:var(--grid); stroke-width:1}
 .baseline{stroke:var(--axis); stroke-width:1}
-.tick{font-size:10.5px; fill:var(--ink-3)}
+.tick{font-size:10.5px; fill:var(--ink-3); font-family:var(--font-num)}
 .rotulo-serie{font-size:11px; font-weight:600}
 .legenda{display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:12px; color:var(--ink-2)}
 .legenda span.it{display:inline-flex; align-items:center; gap:6px}
@@ -118,12 +130,13 @@ svg{display:block; width:100%; height:auto; overflow:visible}
 }
 .dica .t{font-weight:650; margin-bottom:5px; font-size:12px; color:var(--ink-1)}
 .dica .l{display:flex; justify-content:space-between; gap:14px; color:var(--ink-2); line-height:1.7}
-.dica .l b{color:var(--ink-1); font-variant-numeric:tabular-nums; font-weight:600}
+.dica .l b{color:var(--ink-1); font-family:var(--font-num); font-variant-numeric:tabular-nums; font-weight:500}
 .dica .l i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
 
 /* ---------- tabela ---------- */
 .rolagem{overflow-x:auto; -webkit-overflow-scrolling:touch}
 table{border-collapse:collapse; width:100%; font-size:12.5px; font-variant-numeric:tabular-nums}
+tbody td:not(:first-child){font-family:var(--font-num)}
 th,td{padding:7px 10px; text-align:right; border-bottom:1px solid var(--grid); white-space:nowrap}
 th:first-child,td:first-child{text-align:left; white-space:normal; min-width:230px; position:sticky; left:0; background:var(--surface-1)}
 thead th{color:var(--ink-3); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; position:sticky; top:0; background:var(--surface-1)}

@@ -54,6 +54,13 @@ const unidadeCurta = (u) => {
 };
 
 /* ---------------- acesso aos dados ---------------- */
+const MENOR_MELHOR = /depend[êe]ncia de transfer/i;
+/* Largura reservada aos nomes: o mais longo do recorte manda, com teto para
+   não engolir a área do gráfico. Unidades são do viewBox, com nomes a 12px. */
+const margemNomes = (W) => {
+  const maior = MUNS.reduce((n, m) => Math.max(n, m.nome.length), 0);
+  return Math.round(Math.min(W * 0.42, Math.max(W * 0.24, maior * 6.4 + 18)));
+};
 const ind = (id) => D.indicadores[id];
 const serie = (i, cod) => (i && i.valores[cod]) || {};
 function valor(i, cod, ano) {
@@ -182,7 +189,7 @@ function grafBarras(indic, ano, { maiorMelhor = true, largura = 760 } = {}) {
   if (!linhas.length) return el('div', { class: 'vazio', text: 'Sem dados para o ano selecionado.' });
 
   const W = largura, alturaLinha = 30;
-  const ml = Math.round(W * 0.24), mr = Math.round(W * 0.17);
+  const ml = margemNomes(W), mr = Math.round(W * 0.17);
   const plot = W - ml - mr;
   const H = linhas.length * alturaLinha + 8;
 
@@ -238,7 +245,7 @@ function grafBarras(indic, ano, { maiorMelhor = true, largura = 760 } = {}) {
 
 /* ---------------- barras empilhadas 100% ---------------- */
 function grafEmpilhado(indicadores, ano, rotulos, largura = 760) {
-  const W = largura, alturaLinha = 34, ml = Math.round(W * 0.24), mr = Math.round(W * 0.03);
+  const W = largura, alturaLinha = 34, ml = margemNomes(W), mr = Math.round(W * 0.03);
   const linhas = MUNS.map((m) => {
     const partes = indicadores.map((i) => valor(i, m.codigo, ano));
     const total = partes.reduce((s, v) => s + (v || 0), 0);
@@ -300,9 +307,9 @@ function spark(pontos, cc) {
 }
 
 /* ---------------- montagem das seções ---------------- */
-function bloco(titulo, descricao, corpo, fonteTxt, numero) {
+function bloco(titulo, descricao, corpo, fonteTxt) {
   const s = el('section');
-  s.appendChild(el('h2', { html: `<span class="num">${numero}</span>${titulo}` }));
+  s.appendChild(el('h2', { text: titulo }));
   if (descricao) s.appendChild(el('p', { class: 'desc', html: descricao }));
   s.appendChild(corpo);
   if (fonteTxt) s.appendChild(el('p', { class: 'fonte', html: fonteTxt }));
@@ -339,7 +346,7 @@ function secPanorama() {
   const escolhas = [
     { re: /^população residente estimada/i, rot: 'População estimada' },
     { re: /^produto interno bruto a preços correntes$/i, rot: 'PIB' },
-    { re: /produto interno bruto per capita/i, rot: 'PIB por habitante' },
+    { id: 'der_pib_pc', rot: 'PIB por habitante' },
     { re: /^número de unidades locais/i, rot: 'Unidades locais (empresas)' },
     { re: /pessoal ocupado total/i, rot: 'Pessoal ocupado' },
     { id: 'der_receita_pc', rot: 'Receita municipal por habitante' },
@@ -357,7 +364,7 @@ function secPanorama() {
     const anos = Object.keys(s).sort();
     const ant = anos.length > 1 ? s[anos[anos.length - 2]] : null;
     const varPct = ant ? ((v / ant) - 1) * 100 : null;
-    const menorMelhor = /dependência/i.test(i.rotulo);
+    const menorMelhor = MENOR_MELHOR.test(i.rotulo);
     const rk = ranking(i, ano, !menorMelhor);
     const pos = rk.findIndex((r) => r.m.codigo === destaque) + 1;
 
@@ -367,8 +374,10 @@ function secPanorama() {
     t.appendChild(el('div', { class: 'un', text: `${unidadeCurta(i.unidade)} · ${ano}` }));
     const pe = el('div', { class: 'pe' });
     if (pos) pe.appendChild(el('span', { class: 'rank', text: `${pos}º de ${rk.length} na região` }));
+    // Em "dependência de transferências", subir é piorar: a cor segue o sentido, não o sinal.
+    const bom = menorMelhor ? varPct < 0 : varPct >= 0;
     if (varPct !== null && Number.isFinite(varPct))
-      pe.appendChild(el('span', { class: varPct >= 0 ? 'pos' : 'neg',
+      pe.appendChild(el('span', { class: bom ? 'pos' : 'neg',
         text: `${varPct >= 0 ? '▲' : '▼'} ${nf(1).format(Math.abs(varPct))}% vs. ${anos[anos.length - 2]}` }));
     t.appendChild(pe);
     if (anos.length > 3) {
@@ -380,7 +389,7 @@ function secPanorama() {
   if (!n) return null;
   return bloco(`Panorama de ${m.nome}`,
     'Cada indicador traz o valor mais recente publicado, a posição do município entre os oito vizinhos e a variação em relação ao período anterior.',
-    g, null, '01');
+    g);
 }
 
 /* --- seletor de indicador --- */
@@ -425,12 +434,12 @@ function secComparativo() {
     anoRotulo.textContent = `Ano de referência: ${ano}`;
     alvo.appendChild(cartaoGrafico(i.rotulo,
       `<span style="color:var(--ink-3)">${unidadeCurta(i.unidade)} · ${ano} · ${i.fonte}</span>`,
-      grafBarras(i, ano, { maiorMelhor: !/dependência/i.test(i.rotulo) })));
+      grafBarras(i, ano, { maiorMelhor: !MENOR_MELHOR.test(i.rotulo) })));
   }
   desenhar(sel.value || inicial);
   caixa.__redesenhar = () => desenhar(sel.value);
 
-  const s = bloco('Comparativo regional', 'Os oito municípios lado a lado em qualquer indicador da base. Atibaia aparece destacada.', caixa, null, '02');
+  const s = bloco('Comparativo regional', 'Os oito municípios lado a lado em qualquer indicador da base. Atibaia aparece destacada.', caixa);
   s.__caixa = caixa;
   return s;
 }
@@ -458,7 +467,7 @@ function secEvolucao() {
   desenhar(sel.value || inicial);
   caixa.__redesenhar = () => desenhar(sel.value);
   const s = bloco('Evolução no tempo',
-    'Use os botões de município na barra superior para incluir ou tirar cidades da comparação.', caixa, null, '03');
+    'Use os botões de município na barra superior para incluir ou tirar cidades da comparação.', caixa);
   s.__caixa = caixa;
   return s;
 }
@@ -483,7 +492,7 @@ function secEstrutura() {
   f1.appendChild(legendaLivre(rotulos));
   c1.appendChild(f1); g.appendChild(c1);
 
-  const pibpc = acharInd(/produto interno bruto per capita/i);
+  const pibpc = ind('der_pib_pc');
   if (pibpc) {
     const a2 = ultimoAno(pibpc);
     g.appendChild(cartaoGrafico('PIB por habitante',
@@ -491,7 +500,7 @@ function secEstrutura() {
   }
   return bloco('Estrutura econômica',
     'Quanto de cada economia local vem do campo, da indústria, dos serviços privados e do setor público — e quanto de produto isso gera por habitante.',
-    g, null, '04');
+    g);
 }
 
 /* --- 5. finanças públicas --- */
@@ -530,7 +539,7 @@ function secFinancas() {
   }
   return bloco('Finanças públicas',
     'Capacidade de arrecadação, grau de dependência de repasses e destino do gasto — o retrato fiscal de cada prefeitura, direto das Contas Anuais entregues ao Tesouro Nacional.',
-    g, null, '05');
+    g);
 }
 
 /* --- 6. comércio exterior --- */
@@ -544,7 +553,7 @@ function secComex() {
   if (imp) g.appendChild(cartaoGrafico('Importações', '<span style="color:var(--ink-3)">US$ FOB por ano · MDIC/Comex Stat</span>', grafLinhas(imp, cods, { largura: 540 }), cods));
   return bloco('Comércio exterior',
     'Valores atribuídos ao município de domicílio fiscal da empresa exportadora ou importadora — um bom termômetro da presença industrial e da inserção externa de cada cidade.',
-    g, null, '06');
+    g);
 }
 
 /* --- 7. contexto macro --- */
@@ -564,7 +573,7 @@ function secMacro() {
   });
   return bloco('Contexto macroeconômico',
     'O pano de fundo nacional em que esses números foram gerados — série do Banco Central, atualizada a cada coleta.',
-    g, null, '07');
+    g);
 }
 
 /* --- 8. tabela completa --- */
@@ -619,7 +628,7 @@ function secTabela() {
   caixa.__redesenhar = desenhar;
   const s = bloco('Base completa',
     `Todos os ${Object.keys(D.indicadores).length} indicadores coletados, no ano mais recente de cada série. Em verde, o maior valor da região; em negrito, o município em destaque.`,
-    caixa, null, '08');
+    caixa);
   s.__caixa = caixa;
   return s;
 }
@@ -638,7 +647,7 @@ function secFontes() {
     'Cada indicador carrega o ano da sua própria série: bases anuais (PIB, Censo, CEMPRE) mudam uma vez por ano, enquanto Tesouro e Comex Stat mudam ao longo do ano. ' +
     'Quando uma fonte está fora do ar, a coleta preserva o dado anterior em vez de apagá-lo.' }));
   c.appendChild(d);
-  return bloco('Fontes e método', 'Tudo aqui vem de bases públicas e verificáveis. Os links levam à origem de cada número.', c, null, '09');
+  return bloco('Fontes e método', 'Tudo aqui vem de bases públicas e verificáveis. Os links levam à origem de cada número.', c);
 }
 
 /* ---------------- controles ---------------- */
@@ -680,11 +689,7 @@ function render() {
   c.innerHTML = '';
   const secoes = [secPanorama(), secComparativo(), secEvolucao(), secEstrutura(),
     secFinancas(), secComex(), secMacro(), secTabela(), secFontes()].filter(Boolean);
-  secoes.forEach((s, i) => {
-    const n = s.querySelector('.num');
-    if (n) n.textContent = String(i + 1).padStart(2, '0');
-    c.appendChild(s);
-  });
+  secoes.forEach((s) => c.appendChild(s));
 }
 
 function cabecalho() {
