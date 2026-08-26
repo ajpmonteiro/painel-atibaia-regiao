@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-08-25T21:42:27.008Z",
+  "geradoEm": "2026-08-26T20:59:32.552Z",
   "diagnostico": [
     {
       "fonte": "IBGE 6579",
@@ -12,7 +12,7 @@
         "inicio": 2001,
         "fim": 2025
       },
-      "ms": 370
+      "ms": 572
     },
     {
       "fonte": "IBGE 4714",
@@ -25,7 +25,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 356
+      "ms": 463
     },
     {
       "fonte": "IBGE 5938",
@@ -38,7 +38,7 @@
         "inicio": 2002,
         "fim": 2023
       },
-      "ms": 358
+      "ms": 1040
     },
     {
       "fonte": "IBGE 1685",
@@ -51,7 +51,7 @@
         "inicio": 2006,
         "fim": 2021
       },
-      "ms": 357
+      "ms": 1338
     },
     {
       "fonte": "IBGE 5457",
@@ -64,7 +64,7 @@
         "inicio": 1974,
         "fim": 2024
       },
-      "ms": 379
+      "ms": 1807
     },
     {
       "fonte": "IBGE 4709",
@@ -77,7 +77,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 351
+      "ms": 458
     },
     {
       "fonte": "IBGE 6804",
@@ -90,7 +90,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 353,
+      "ms": 479,
       "classificacaoUsada": "Principal forma de abastecimento de água",
       "categoriasVistas": [
         "Total",
@@ -118,7 +118,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 357,
+      "ms": 1667,
       "classificacaoUsada": "Tipo de esgotamento sanitário",
       "categoriasVistas": [
         "Total",
@@ -147,7 +147,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 349,
+      "ms": 463,
       "classificacaoUsada": "Destino do lixo",
       "categoriasVistas": [
         "Total",
@@ -174,7 +174,7 @@
         "inicio": 2003,
         "fim": 2024
       },
-      "ms": 358
+      "ms": 994
     },
     {
       "fonte": "Tesouro Nacional / SICONFI",
@@ -248,23 +248,174 @@
       "rotulo": "contexto macroeconômico",
       "ok": true,
       "series": 5
+    },
+    {
+      "fonte": "SSP-SP — Dados Abertos SP",
+      "rotulo": "ocorrências criminais",
+      "ok": false,
+      "experimental": true,
+      "nota": "Reconhecimento: estrutura do portal registrada abaixo.",
+      "conjuntos": [
+        {
+          "id": "dados-seguranca-publica",
+          "titulo": "BASE DE DADOS DA SECRETARIA DA SEGURANÇA PÚBLICA",
+          "recursos": 6
+        },
+        {
+          "id": "numeros-sem-misterio",
+          "titulo": "NÚMEROS SEM MISTÉRIO",
+          "recursos": 12
+        }
+      ],
+      "recursos": [
+        {
+          "pacote": "BASE DE DADOS DA SECRETARIA DA SEGURANÇA PÚBLICA",
+          "nome": "PLANO DE AÇÃO 2024",
+          "formato": "PDF",
+          "id": "3f77fccf",
+          "datastore": false
+        },
+        {
+          "pacote": "BASE DE DADOS DA SECRETARIA DA SEGURANÇA PÚBLICA",
+          "nome": "CONTRATOS E COMPRAS PÚBLICAS",
+          "formato": "",
+          "id": "92e8fd22",
+          "datastore": false
+        },
+        {
+          "pacote": "BASE DE DADOS DA SECRETARIA DA SEGURANÇA PÚBLICA",
+          "nome": "CONVÊNIOS, REPASSES E TRANSFERÊNCIAS",
+          "formato": "",
+          "id": "c7602841",
+          "datastore": false
+        },
+        {
+          "pacote": "BASE DE DADOS DA SECRETARIA DA SEGURANÇA PÚBLICA",
+          "nome": "RECEITAS E DESPESAS",
+          "formato": "",
+          "id": "8eb5cac0",
+          "datastore": false
+        },
+        {
+          "pacote": "BASE DE DADOS DA SECRETARIA DA SEGURANÇA PÚBLICA",
+          "nome": "REMUNERAÇÃO MENSAL DOS SERVIDORES PÚBLICOS E DIÁRIAS E PASSAGENS AÉREAS",
+          "formato": "",
+          "id": "611d29a8",
+          "datastore": false
+        },
+        {
+          "pacote": "BASE DE DADOS DA SECRETARIA DA SEGURANÇA PÚBLICA",
+          "nome": "RESOLUÇÃO SSP 516/2000 ",
+          "formato": "",
+          "id": "cc40afbe",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "NOTAS TÉCNICAS E RELATÓRIO",
+          "formato": "",
+          "id": "36cd47e6",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "INDICADORES CRIMINAIS E DE PRODUTIVIDADE POLICIAL ",
+          "formato": "",
+          "id": "d795df8b",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "DADOS MENSAIS",
+          "formato": "",
+          "id": "f6984a9e",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "DADOS TRIMESTRAIS",
+          "formato": "",
+          "id": "a3bf7271",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "PAINEL DE DADOS ESTATÍSTICOS",
+          "formato": "",
+          "id": "4083a7e2",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "CONSULTAS",
+          "formato": "",
+          "id": "228ab9f3",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "DADOS ESTATÍSTICOS DO CORPO DE BOMBEIROS DO ESTADO DE SÃO PAULO",
+          "formato": "",
+          "id": "d6682333",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "RELATÓRIOS E ESTUDOS",
+          "formato": "",
+          "id": "e02c4900",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "SP VIDA",
+          "formato": "",
+          "id": "370d2cb4",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "SP CENAS DE USO",
+          "formato": "",
+          "id": "4c57e0a1",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "SP CARGA",
+          "formato": "",
+          "id": "bea7878f",
+          "datastore": false
+        },
+        {
+          "pacote": "NÚMEROS SEM MISTÉRIO",
+          "nome": "VIOLÊNCIA CONTRA A MULHER",
+          "formato": "",
+          "id": "6e32b264",
+          "datastore": false
+        }
+      ],
+      "erros": [
+        "nenhum recurso com datastore ativo — os dados devem estar só em arquivo"
+      ]
     }
   ],
   "registro": [
-    "21:41:57 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
-    "21:41:57 IBGE 6579 (Estimativas da População): 1 indicadores",
-    "21:41:58 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
-    "21:41:59 IBGE 5938 (PIB dos Municípios): 7 indicadores",
-    "21:42:00 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
-    "21:42:00 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
-    "21:42:00 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "21:42:00 IBGE 5457 (Produção Agrícola Municipal): 4 indicadores",
-    "21:42:01 IBGE 4709 (Censo 2022 — variação e taxa de crescimento): 3 indicadores",
-    "21:42:02 IBGE 6804 (Censo 2022 — abastecimento de água): 2 indicadores",
-    "21:42:03 IBGE 6805 (Censo 2022 — esgotamento sanitário): 2 indicadores",
-    "21:42:03 IBGE 6892 (Censo 2022 — destino do lixo): 2 indicadores",
-    "21:42:04 IBGE 2612 (Nascidos vivos — Registro Civil): 1 indicadores",
-    "21:42:08 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "21:42:24 BCB: 5 séries"
+    "20:59:00 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
+    "20:59:00 IBGE 6579 (Estimativas da População): 1 indicadores",
+    "20:59:01 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
+    "20:59:02 Segurança: nenhum recurso consultável por API",
+    "20:59:03 IBGE 5938 (PIB dos Municípios): 7 indicadores",
+    "20:59:03 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "20:59:04 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
+    "20:59:05 BCB: 5 séries",
+    "20:59:07 IBGE 5457 (Produção Agrícola Municipal): 4 indicadores",
+    "20:59:07 IBGE 4709 (Censo 2022 — variação e taxa de crescimento): 3 indicadores",
+    "20:59:08 IBGE 6804 (Censo 2022 — abastecimento de água): 2 indicadores",
+    "20:59:10 IBGE 6805 (Censo 2022 — esgotamento sanitário): 2 indicadores",
+    "20:59:11 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "20:59:11 IBGE 6892 (Censo 2022 — destino do lixo): 2 indicadores",
+    "20:59:13 IBGE 2612 (Nascidos vivos — Registro Civil): 1 indicadores",
+    "20:59:32 SICONFI: receitas 64, despesas 64, vazios 0, erros 0"
   ]
 }
