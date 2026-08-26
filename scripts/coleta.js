@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   resolverMunicipios, coletarIBGE, coletarSiconfi, coletarComex,
-  coletarMacro, catalogoIBGE,
+  coletarMacro, coletarSeguranca, catalogoIBGE,
 } from './sources.js';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -31,6 +31,7 @@ async function principal() {
     coletarSiconfi(municipios, log),
     coletarComex(municipios, log),
     coletarMacro(log),
+    coletarSeguranca(municipios, log),
   ]);
 
   const indicadores = {};
@@ -193,6 +194,24 @@ export function derivados(municipios, ind) {
     rotulo: 'Saúde — % da despesa empenhada', unidade: '%', grupo: 'Finanças públicas',
     fonte: 'Tesouro Nacional — SICONFI (cálculo próprio)', fonteUrl: 'https://siconfi.tesouro.gov.br/',
   }, ind['fin_desp_10'], ind['fin_despesa_total'], 100);
+
+  // Contagem bruta não compara municípios de portes diferentes: a taxa por 100 mil
+  // habitantes é o indicador comparável. Em cidades pequenas ela oscila muito de um
+  // ano para o outro — uma ocorrência a mais em Nazaré Paulista move ~5 pontos.
+  for (const [chave, rot] of [
+    ['homicidio', 'Homicídios dolosos'],
+    ['roubo', 'Roubos (outros)'],
+    ['roubo_veiculo', 'Roubos de veículo'],
+    ['furto', 'Furtos (outros)'],
+    ['furto_veiculo', 'Furtos de veículo'],
+  ]) {
+    razao(`der_taxa_${chave}`, {
+      rotulo: `${rot} por 100 mil habitantes`, unidade: 'por 100 mil hab.',
+      grupo: 'Segurança pública',
+      fonte: 'SSP-SP + IBGE (cálculo próprio)',
+      fonteUrl: 'https://www.ssp.sp.gov.br/estatistica/dados-mensais',
+    }, ind[`seg_${chave}`], pop, 100000);
+  }
 
   razao('der_export_pc', {
     rotulo: 'Exportações por habitante', unidade: 'US$/hab', grupo: 'Comércio exterior',

@@ -196,6 +196,30 @@ globalThis.fetch = async (url, opts = {}) => {
     return jsonRes({ data: { list }, success: true });
   }
 
+  if (u.includes('dadosabertos.sp.gov.br')) {
+    if (u.includes('package_show'))
+      return jsonRes({ result: { title: 'Base de dados da SSP', resources: [
+        { name: 'Ocorrências 2025', format: 'CSV', id: 'res-2025', datastore_active: true },
+        { name: 'Ocorrências 2026', format: 'CSV', id: 'res-2026', datastore_active: true },
+        { name: 'Dicionário', format: 'PDF', id: 'dic', datastore_active: false }] } });
+    if (u.includes('datastore_search')) {
+      const campos = ['_id', 'ano', 'municipio', 'natureza_apurada', 'total'].map((id) => ({ id }));
+      if (/limit=1(&|$)/.test(u))
+        return jsonRes({ result: { fields: campos, records: [
+          { _id: 1, ano: '2026', municipio: 'ATIBAIA', natureza_apurada: 'HOMICÍDIO DOLOSO', total: '7' }] } });
+      const filtro = JSON.parse(decodeURIComponent((u.match(/filters=([^&]+)/) || [, '{}'])[1]));
+      const mun = filtro.municipio || 'ATIBAIA';
+      const naturezas = ['HOMICÍDIO DOLOSO', 'HOMICÍDIO DOLOSO POR ACIDENTE DE TRÂNSITO',
+        'ROUBO - OUTROS', 'ROUBO DE VEÍCULO', 'FURTO - OUTROS', 'FURTO DE VEÍCULO', 'ESTUPRO'];
+      const records = [];
+      for (const ano of ['2024', '2025', '2026'])
+        for (const n of naturezas)
+          records.push({ ano, municipio: mun, natureza_apurada: n, total: String(Math.round(1 + rnd() * 400)) });
+      return jsonRes({ result: { fields: campos, records } });
+    }
+    return jsonRes({ result: {} });
+  }
+
   if (u.includes('api.bcb.gov.br')) {
     const pontos = [];
     for (let i = 0; i < 60; i++) pontos.push({ data: `01/${String((i % 12) + 1).padStart(2, '0')}/2025`, valor: (rnd() * 2).toFixed(2) });

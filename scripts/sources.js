@@ -740,3 +740,145 @@ export async function coletarMacro(log) {
  * pela EPE (Empresa de Pesquisa Energética), em planilhas do Anuário Estatístico,
  * sem API — o que exigiria um raspador, não um cliente de API.
  */
+
+/* ------------------------------------------------------------------ */
+/* Segurança pública - SSP-SP via portal de dados abertos do Estado    */
+/* ------------------------------------------------------------------ */
+
+const CKAN_SP = 'https://dadosabertos.sp.gov.br/api/3/action';
+
+/** Nomes de campo variam entre publicações; detectamos pelo que o recurso expõe. */
+const acharCampo = (campos, re) => campos.find((c) => re.test(c));
+
+/**
+ * Não existe "índice de criminalidade" oficial: o que a SSP-SP publica são
+ * contagens de ocorrências por município, mês e natureza. O painel extrai as
+ * naturezas comparáveis e a taxa por 100 mil habitantes é calculada nos derivados.
+ *
+ * Esta rodada tenta a extração e, se a estrutura não for a esperada, registra
+ * campos e amostra no diagnóstico em vez de falhar em silêncio.
+ */
+export async function coletarSeguranca(municipios, log) {
+  const indicadores = {};
+  const inspecao = { conjuntos: [], recursos: [], erros: [] };
+
+  /* 1) Localizar os conjuntos de segurança pública */
+  let recursos = [];
+  for (const id of ['dados-seguranca-publica', 'numeros-sem-misterio']) {
+    try {
+      const j = await httpGet(`${CKAN_SP}/package_show?id=${id}`, { timeout: 60000 });
+      const p = j?.result;
+      if (!p) continue;
+      inspecao.conjuntos.push({ id, titulo: p.title, recursos: (p.resources || []).length });
+      for (const r of p.resources || []) {
+        recursos.push({ pacote: p.title, nome: r.name, formato: r.format, id: r.id, datastore: !!r.datastore_active });
+      }
+    } catch (e) {
+      inspecao.erros.push(`package_show ${id}: ${String(e.message || e).slice(0, 120)}`);
+    }
+    await sleep(500);
+  }
+  inspecao.recursos = recursos.slice(0, 25).map((r) => ({ ...r, id: r.id?.slice(0, 8) }));
+
+  /* 2) Do recurso mais recente com datastore, descobrir os campos */
+  const comDatastore = recursos.filter((r) => r.datastore);
+  if (!comDatastore.length) {
+    inspecao.erros.push('nenhum recurso com datastore ativo — os dados devem estar só em arquivo');
+    log?.('Segurança: nenhum recurso consultável por API');
+    return { indicadores, diagnostico: [{
+      fonte: 'SSP-SP — Dados Abertos SP', rotulo: 'ocorrências criminais',
+      ok: false, experimental: true,
+      nota: 'Reconhecimento: estrutura do portal registrada abaixo.', ...inspecao }] };
+  }
+
+  // O recurso de nome "maior" costuma ser o mais recente (ex.: 2026 > 2025).
+  const alvo = [...comDatastore].sort((a, b) => String(b.nome).localeCompare(String(a.nome)))[0];
+
+  let campos = [];
+  let amostra = null;
+  try {
+    const j = await httpGet(`${CKAN_SP}/datastore_search?resource_id=${alvo.id}&limit=1`, { timeout: 60000 });
+    campos = (j?.result?.fields || []).map((f) => f.id);
+    amostra = j?.result?.records?.[0] || null;
+  } catch (e) {
+    inspecao.erros.push(`datastore_search: ${String(e.message || e).slice(0, 140)}`);
+  }
+  inspecao.recursoInspecionado = { nome: alvo.nome, campos, amostra };
+
+  const cMun = acharCampo(campos, /munic/i);
+  const cNat = acharCampo(campos, /natureza|rubrica|delito|tipo/i);
+  const cAno = acharCampo(campos, /^ano$|ano_/i);
+  const cQtd = acharCampo(campos, /total|quantidade|qtd|ocorr/i);
+
+  if (!cMun || !cNat) {
+    inspecao.erros.push(`campos essenciais não identificados (município=${cMun}, natureza=${cNat})`);
+    log?.(`Segurança: campos não reconhecidos — ${campos.join(', ')}`);
+    return { indicadores, diagnostico: [{
+      fonte: 'SSP-SP — Dados Abertos SP', rotulo: 'ocorrências criminais',
+      ok: false, experimental: true,
+      nota: 'Reconhecimento: campos do recurso registrados abaixo para fixar a extração.',
+      ...inspecao }] };
+  }
+
+  /* 3) Extrair as naturezas comparáveis, município a município */
+  const NATUREZAS = [
+    { id: 'homicidio', re: /homic[íi]dio doloso(?!.*tentativa)/i, rotulo: 'Homicídios dolosos' },
+    { id: 'roubo', re: /^roubo - outros|roubo \(outros\)|total de roubo/i, rotulo: 'Roubos (outros)' },
+    { id: 'roubo_veiculo', re: /roubo de ve[íi]culo/i, rotulo: 'Roubos de veículo' },
+    { id: 'furto', re: /^furto - outros|furto \(outros\)|total de furto/i, rotulo: 'Furtos (outros)' },
+    { id: 'furto_veiculo', re: /furto de ve[íi]culo/i, rotulo: 'Furtos de veículo' },
+  ];
+  const base = {
+    grupo: 'Segurança pública',
+    fonte: 'SSP-SP — Secretaria da Segurança Pública de São Paulo',
+    fonteUrl: 'https://www.ssp.sp.gov.br/estatistica/dados-mensais',
+    unidade: 'Ocorrências',
+  };
+
+  const naturezasVistas = new Set();
+  let linhasLidas = 0;
+
+  for (const m of municipios) {
+    try {
+      const url = `${CKAN_SP}/datastore_search?resource_id=${alvo.id}` +
+        `&filters=${encodeURIComponent(JSON.stringify({ [cMun]: m.nome.toUpperCase() }))}&limit=2000`;
+      const j = await httpGet(url, { timeout: 90000 });
+      const linhas = j?.result?.records || [];
+      linhasLidas += linhas.length;
+      for (const r of linhas) {
+        const nat = String(r[cNat] || '');
+        naturezasVistas.add(nat);
+        const alvoNat = NATUREZAS.find((n) => n.re.test(nat));
+        if (!alvoNat) continue;
+        const ano = String(cAno ? r[cAno] : (alvo.nome.match(/20\d\d/) || [''])[0]);
+        const qtd = num(cQtd ? r[cQtd] : null);
+        if (!/^\d{4}$/.test(ano) || qtd === null) continue;
+        const id = `seg_${alvoNat.id}`;
+        indicadores[id] = indicadores[id] || { id, rotulo: alvoNat.rotulo, ...base, periodos: [], valores: {} };
+        const I = indicadores[id];
+        I.valores[m.codigo] = I.valores[m.codigo] || {};
+        I.valores[m.codigo][ano] = (I.valores[m.codigo][ano] || 0) + qtd;
+        if (!I.periodos.includes(ano)) I.periodos.push(ano);
+      }
+    } catch (e) {
+      inspecao.erros.push(`${m.nome}: ${String(e.message || e).slice(0, 120)}`);
+    }
+    await sleep(400);
+  }
+  for (const i of Object.values(indicadores)) i.periodos.sort();
+
+  const criados = Object.keys(indicadores).length;
+  log?.(`Segurança: ${criados} indicadores, ${linhasLidas} linhas lidas de "${alvo.nome}"`);
+  return {
+    indicadores,
+    diagnostico: [{
+      fonte: 'SSP-SP — Secretaria da Segurança Pública de São Paulo',
+      rotulo: 'ocorrências criminais por município',
+      ok: criados > 0, experimental: criados === 0,
+      indicadores: criados, linhasLidas, recurso: alvo.nome,
+      campos, naturezasVistas: [...naturezasVistas].slice(0, 25),
+      erros: inspecao.erros.length ? inspecao.erros.slice(0, 5) : undefined,
+      conjuntos: criados ? undefined : inspecao.conjuntos,
+    }],
+  };
+}
