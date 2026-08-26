@@ -27,11 +27,17 @@ Nenhum servidor para manter, nenhum custo: o motor roda dentro do GitHub Actions
 | **Tesouro Nacional — SICONFI/DCA** | receitas e despesas de cada prefeitura, despesa por função (educação, saúde, urbanismo…) | anual |
 | **MDIC — Comex Stat** | exportações e importações por município da empresa | anual¹ |
 | **Banco Central — SGS** | IPCA, Selic, IBC-Br, câmbio, desocupação (contexto nacional) | mensal |
+| **SSP-SP** (via Dados Abertos SP) | ocorrências criminais por município — homicídio doloso, roubo, furto e veículos | mensal² |
 
 ¹ O recorte municipal do Comex Stat só é publicado por ano fechado. Janelas parciais e
 `monthDetail: true` devolvem lista vazia — por isso a série usa apenas anos completos.
 A API identifica o município pelo **nome com a sigla da UF** (`"Atibaia - SP"`), não por
 código do IBGE; o casamento é feito por nome, exigindo `SP` para evitar homônimos.
+
+² Não existe "índice de criminalidade" oficial: a SSP-SP publica contagens de
+ocorrências por município, mês e natureza. O painel extrai as naturezas comparáveis e
+calcula a **taxa por 100 mil habitantes**. Em municípios pequenos essa taxa é volátil —
+uma ocorrência a mais move vários pontos —, o que está dito na própria seção do painel.
 
 Indicadores derivados (PIB por habitante, per capita de receita e despesa, participação
 setorial, dependência de transferências, autonomia tributária, saldo comercial) são
