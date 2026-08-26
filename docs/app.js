@@ -54,7 +54,9 @@ const unidadeCurta = (u) => {
 };
 
 /* ---------------- acesso aos dados ---------------- */
-const MENOR_MELHOR = /depend[êe]ncia de transfer/i;
+// Indicadores em que estar no topo do gráfico é ruim: o ranking e a cor da
+// variação seguem o significado, não o valor.
+const MENOR_MELHOR = /depend[êe]ncia de transfer|homic[íi]dio|roubo|furto/i;
 /* Largura reservada aos nomes: o mais longo do recorte manda, com teto para
    não engolir a área do gráfico. Unidades são do viewBox, com nomes a 12px. */
 const margemNomes = (W) => {
@@ -560,6 +562,28 @@ function secInfra() {
     g);
 }
 
+/* --- segurança pública --- */
+function secSeguranca() {
+  const taxas = Object.values(D.indicadores)
+    .filter((i) => i.grupo === 'Segurança pública' && /100 mil/.test(i.unidade || ''));
+  if (!taxas.length) return null;
+  const ordem = ['homicidio', 'roubo_veiculo', 'roubo', 'furto_veiculo', 'furto'];
+  taxas.sort((a, b) => ordem.findIndex((k) => a.id.includes(k)) - ordem.findIndex((k) => b.id.includes(k)));
+
+  const g = el('div', { class: 'grade g2' });
+  for (const i of taxas) {
+    const a = ultimoAno(i);
+    g.appendChild(cartaoGrafico(i.rotulo.replace(' por 100 mil habitantes', ''),
+      `<span style="color:var(--ink-3)">por 100 mil habitantes · ${a} · SSP-SP · menor é melhor</span>`,
+      grafBarras(i, a, { maiorMelhor: false, largura: 540 })));
+  }
+  const s = bloco('Segurança pública',
+    'Ocorrências registradas pela Secretaria da Segurança Pública, convertidas em taxa por 100 mil habitantes para permitir a comparação entre cidades de portes diferentes. ' +
+    '<b>Leia com cuidado nas cidades pequenas:</b> onde a população é de poucos milhares, uma ocorrência a mais move a taxa vários pontos — a variação de um ano para o outro diz mais sobre o acaso do que sobre tendência.',
+    g);
+  return s;
+}
+
 /* --- 6. comércio exterior --- */
 function secComex() {
   const exp = ind('comex_export_fob'), imp = ind('comex_import_fob'), sal = ind('der_saldo_comercial');
@@ -711,7 +735,8 @@ function render() {
   const c = $('#conteudo');
   c.innerHTML = '';
   const secoes = [secPanorama(), secComparativo(), secEvolucao(), secEstrutura(),
-    secInfra(), secFinancas(), secComex(), secMacro(), secTabela(), secFontes()].filter(Boolean);
+    secInfra(), secSeguranca(), secFinancas(), secComex(), secMacro(),
+    secTabela(), secFontes()].filter(Boolean);
   secoes.forEach((s) => c.appendChild(s));
 }
 
