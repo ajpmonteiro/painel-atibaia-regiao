@@ -27,7 +27,7 @@ Nenhum servidor para manter, nenhum custo: o motor roda dentro do GitHub Actions
 | **Tesouro Nacional — SICONFI/DCA** | receitas e despesas de cada prefeitura, despesa por função (educação, saúde, urbanismo…) | anual |
 | **MDIC — Comex Stat** | exportações e importações por município da empresa | anual¹ |
 | **Banco Central — SGS** | IPCA, Selic, IBC-Br, câmbio, desocupação (contexto nacional) | mensal |
-| **SSP-SP** (via Dados Abertos SP) | ocorrências criminais por município — homicídio doloso, roubo, furto e veículos | mensal² |
+| **SSP-SP** | ocorrências criminais por município — homicídio doloso, latrocínio, lesão corporal, estupro, roubo e furto | anual² |
 
 ¹ O recorte municipal do Comex Stat só é publicado por ano fechado. Janelas parciais e
 `monthDetail: true` devolvem lista vazia — por isso a série usa apenas anos completos.
@@ -38,6 +38,15 @@ código do IBGE; o casamento é feito por nome, exigindo `SP` para evitar homôn
 ocorrências por município, mês e natureza. O painel extrai as naturezas comparáveis e
 calcula a **taxa por 100 mil habitantes**. Em municípios pequenos essa taxa é volátil —
 uma ocorrência a mais move vários pontos —, o que está dito na própria seção do painel.
+
+O portal Dados Abertos SP lista a SSP, mas **nenhum recurso é consultável por API**:
+são links e PDFs. Os números vêm da API que o próprio portal da SSP usa —
+`/v1/Municipios/RecuperaMunicipios` e
+`/v1/OcorrenciasMensais/RecuperaDadosMensaisAgrupados?ano=0&grupoDelito=6&tipoGrupo=MUNICIPIO&idGrupo=N`.
+Não é documentada; se mudar, o diagnóstico registra e a fonte cai sozinha sem derrubar
+a coleta. O campo `publicado` diz quantos meses do ano já saíram: ano com menos de 12
+é parcial e não entra na série. Os códigos de município da SSP são próprios, não os do
+IBGE — o casamento é por nome.
 
 Indicadores derivados (PIB por habitante, per capita de receita e despesa, participação
 setorial, dependência de transferências, autonomia tributária, saldo comercial) são
