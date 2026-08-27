@@ -200,9 +200,12 @@ export function derivados(municipios, ind) {
   // ano para o outro — uma ocorrência a mais em Nazaré Paulista move ~5 pontos.
   for (const [chave, rot] of [
     ['homicidio', 'Homicídios dolosos'],
-    ['roubo', 'Roubos (outros)'],
+    ['latrocinio', 'Latrocínios'],
+    ['lesao', 'Lesões corporais dolosas'],
+    ['estupro', 'Estupros'],
+    ['roubo', 'Roubos'],
     ['roubo_veiculo', 'Roubos de veículo'],
-    ['furto', 'Furtos (outros)'],
+    ['furto', 'Furtos'],
     ['furto_veiculo', 'Furtos de veículo'],
   ]) {
     razao(`der_taxa_${chave}`, {
