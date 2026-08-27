@@ -56,7 +56,7 @@ const unidadeCurta = (u) => {
 /* ---------------- acesso aos dados ---------------- */
 // Indicadores em que estar no topo do gráfico é ruim: o ranking e a cor da
 // variação seguem o significado, não o valor.
-const MENOR_MELHOR = /depend[êe]ncia de transfer|homic[íi]dio|roubo|furto/i;
+const MENOR_MELHOR = /depend[êe]ncia de transfer|homic[íi]dio|latroc[íi]nio|les[ãa]o corporal|estupro|roubo|furto/i;
 /* Largura reservada aos nomes: o mais longo do recorte manda, com teto para
    não engolir a área do gráfico. Unidades são do viewBox, com nomes a 12px. */
 const margemNomes = (W) => {
@@ -567,18 +567,23 @@ function secSeguranca() {
   const taxas = Object.values(D.indicadores)
     .filter((i) => i.grupo === 'Segurança pública' && /100 mil/.test(i.unidade || ''));
   if (!taxas.length) return null;
-  const ordem = ['homicidio', 'roubo_veiculo', 'roubo', 'furto_veiculo', 'furto'];
-  taxas.sort((a, b) => ordem.findIndex((k) => a.id.includes(k)) - ordem.findIndex((k) => b.id.includes(k)));
+  // Violência letal primeiro, depois crimes contra o patrimônio. Estupro e lesão
+  // corporal ficam fora do painel visual — dependem muito da taxa de notificação,
+  // e um ranking lado a lado convida à leitura errada. Estão na base completa.
+  const ordem = ['homicidio', 'latrocinio', 'roubo_veiculo', 'roubo', 'furto_veiculo', 'furto'];
+  const naSecao = taxas
+    .filter((i) => ordem.some((k) => i.id.includes(k)))
+    .sort((a, b) => ordem.findIndex((k) => a.id.includes(k)) - ordem.findIndex((k) => b.id.includes(k)));
 
   const g = el('div', { class: 'grade g2' });
-  for (const i of taxas) {
+  for (const i of naSecao) {
     const a = ultimoAno(i);
     g.appendChild(cartaoGrafico(i.rotulo.replace(' por 100 mil habitantes', ''),
       `<span style="color:var(--ink-3)">por 100 mil habitantes · ${a} · SSP-SP · menor é melhor</span>`,
       grafBarras(i, a, { maiorMelhor: false, largura: 540 })));
   }
   const s = bloco('Segurança pública',
-    'Ocorrências registradas pela Secretaria da Segurança Pública, convertidas em taxa por 100 mil habitantes para permitir a comparação entre cidades de portes diferentes. ' +
+    'Ocorrências registradas pela Secretaria da Segurança Pública, convertidas em taxa por 100 mil habitantes para permitir a comparação entre cidades de portes diferentes. Só anos fechados entram — o ano em curso tem meses ainda não publicados. ' +
     '<b>Leia com cuidado nas cidades pequenas:</b> onde a população é de poucos milhares, uma ocorrência a mais move a taxa vários pontos — a variação de um ano para o outro diz mais sobre o acaso do que sobre tendência.',
     g);
   return s;
