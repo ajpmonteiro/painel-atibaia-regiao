@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-09-21T15:40:57.775Z",
+  "geradoEm": "2026-09-28T17:21:54.982Z",
   "diagnostico": [
     {
       "fonte": "IBGE 6579",
@@ -12,7 +12,7 @@
         "inicio": 2001,
         "fim": 2026
       },
-      "ms": 327
+      "ms": 393
     },
     {
       "fonte": "IBGE 4714",
@@ -25,7 +25,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 364
+      "ms": 387
     },
     {
       "fonte": "IBGE 5938",
@@ -38,7 +38,7 @@
         "inicio": 2002,
         "fim": 2023
       },
-      "ms": 934
+      "ms": 824
     },
     {
       "fonte": "IBGE 1685",
@@ -51,7 +51,7 @@
         "inicio": 2006,
         "fim": 2021
       },
-      "ms": 1820
+      "ms": 1079
     },
     {
       "fonte": "IBGE 5457",
@@ -64,7 +64,7 @@
         "inicio": 1974,
         "fim": 2025
       },
-      "ms": 1381
+      "ms": 1553
     },
     {
       "fonte": "IBGE 4709",
@@ -77,7 +77,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 796
+      "ms": 307
     },
     {
       "fonte": "IBGE 6804",
@@ -90,7 +90,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 312,
+      "ms": 1160,
       "classificacaoUsada": "Principal forma de abastecimento de água",
       "categoriasVistas": [
         "Total",
@@ -118,7 +118,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 749,
+      "ms": 311,
       "classificacaoUsada": "Tipo de esgotamento sanitário",
       "categoriasVistas": [
         "Total",
@@ -147,7 +147,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 393,
+      "ms": 497,
       "classificacaoUsada": "Destino do lixo",
       "categoriasVistas": [
         "Total",
@@ -174,7 +174,7 @@
         "inicio": 2003,
         "fim": 2024
       },
-      "ms": 785
+      "ms": 1093
     },
     {
       "fonte": "Tesouro Nacional / SICONFI",
@@ -265,21 +265,21 @@
     }
   ],
   "registro": [
-    "15:39:51 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
-    "15:39:51 IBGE 6579 (Estimativas da População): 1 indicadores",
-    "15:39:52 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
-    "15:39:53 IBGE 5938 (PIB dos Municípios): 7 indicadores",
-    "15:39:55 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
-    "15:39:57 IBGE 5457 (Produção Agrícola Municipal): 4 indicadores",
-    "15:39:58 IBGE 4709 (Censo 2022 — variação e taxa de crescimento): 3 indicadores",
-    "15:39:59 IBGE 6804 (Censo 2022 — abastecimento de água): 2 indicadores",
-    "15:40:00 IBGE 6805 (Censo 2022 — esgotamento sanitário): 2 indicadores",
-    "15:40:01 IBGE 6892 (Censo 2022 — destino do lixo): 2 indicadores",
-    "15:40:02 IBGE 2612 (Nascidos vivos — Registro Civil): 1 indicadores",
-    "15:40:02 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "15:40:05 Segurança: 8 indicadores, anos 2023,2024,2025",
-    "15:40:15 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
-    "15:40:22 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "15:40:57 BCB: 5 séries"
+    "17:21:19 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
+    "17:21:20 IBGE 6579 (Estimativas da População): 1 indicadores",
+    "17:21:20 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
+    "17:21:22 IBGE 5938 (PIB dos Municípios): 7 indicadores",
+    "17:21:23 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
+    "17:21:25 IBGE 5457 (Produção Agrícola Municipal): 4 indicadores",
+    "17:21:26 IBGE 4709 (Censo 2022 — variação e taxa de crescimento): 3 indicadores",
+    "17:21:27 IBGE 6804 (Censo 2022 — abastecimento de água): 2 indicadores",
+    "17:21:28 IBGE 6805 (Censo 2022 — esgotamento sanitário): 2 indicadores",
+    "17:21:29 IBGE 6892 (Censo 2022 — destino do lixo): 2 indicadores",
+    "17:21:30 IBGE 2612 (Nascidos vivos — Registro Civil): 1 indicadores",
+    "17:21:32 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "17:21:34 Segurança: 8 indicadores, anos 2023,2024,2025",
+    "17:21:43 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
+    "17:21:52 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "17:21:54 BCB: 5 séries"
   ]
 }
