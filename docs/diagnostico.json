@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-09-28T17:21:54.982Z",
+  "geradoEm": "2026-10-05T17:54:50.064Z",
   "diagnostico": [
     {
       "fonte": "IBGE 6579",
@@ -12,7 +12,7 @@
         "inicio": 2001,
         "fim": 2026
       },
-      "ms": 393
+      "ms": 443
     },
     {
       "fonte": "IBGE 4714",
@@ -25,7 +25,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 387
+      "ms": 342
     },
     {
       "fonte": "IBGE 5938",
@@ -38,7 +38,7 @@
         "inicio": 2002,
         "fim": 2023
       },
-      "ms": 824
+      "ms": 390
     },
     {
       "fonte": "IBGE 1685",
@@ -51,7 +51,7 @@
         "inicio": 2006,
         "fim": 2021
       },
-      "ms": 1079
+      "ms": 1070
     },
     {
       "fonte": "IBGE 5457",
@@ -64,7 +64,7 @@
         "inicio": 1974,
         "fim": 2025
       },
-      "ms": 1553
+      "ms": 1843
     },
     {
       "fonte": "IBGE 4709",
@@ -77,7 +77,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 307
+      "ms": 497
     },
     {
       "fonte": "IBGE 6804",
@@ -90,7 +90,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 1160,
+      "ms": 691,
       "classificacaoUsada": "Principal forma de abastecimento de água",
       "categoriasVistas": [
         "Total",
@@ -118,7 +118,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 311,
+      "ms": 737,
       "classificacaoUsada": "Tipo de esgotamento sanitário",
       "categoriasVistas": [
         "Total",
@@ -147,7 +147,7 @@
         "inicio": 2022,
         "fim": 2022
       },
-      "ms": 497,
+      "ms": 594,
       "classificacaoUsada": "Destino do lixo",
       "categoriasVistas": [
         "Total",
@@ -174,17 +174,21 @@
         "inicio": 2003,
         "fim": 2024
       },
-      "ms": 1093
+      "ms": 3234
     },
     {
       "fonte": "Tesouro Nacional / SICONFI",
       "rotulo": "Declaração de Contas Anuais (DCA)",
       "ok": true,
-      "receitasOk": 64,
-      "despesasOk": 64,
+      "receitasOk": 63,
+      "despesasOk": 62,
       "vazios": 0,
-      "erros": 0,
-      "errosExemplo": [],
+      "erros": 3,
+      "errosExemplo": [
+        "I-E Jarinu/2018: HTTP 429 em https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca?an_exercicio=2018&no_anexo=DCA-Anexo%20I-E&id_ente=3525201 :: <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>\n<html xmlns='http://www.w3.org/1999/xhtml'>\n\n<head>\n    <meta content='text/ht",
+        "I-C Bom Jesus dos Perdões/2023: HTTP 429 em https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca?an_exercicio=2023&no_anexo=DCA-Anexo%20I-C&id_ente=3507100 :: <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>\n<html xmlns='http://www.w3.org/1999/xhtml'>\n\n<head>\n    <meta content='text/ht",
+        "I-E Bom Jesus dos Perdões/2025: HTTP 429 em https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca?an_exercicio=2025&no_anexo=DCA-Anexo%20I-E&id_ente=3507100 :: <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>\n<html xmlns='http://www.w3.org/1999/xhtml'>\n\n<head>\n    <meta content='text/ht"
+      ],
       "anos": [
         2025,
         2024,
@@ -200,48 +204,14 @@
     {
       "fonte": "Comex Stat",
       "rotulo": "export — série anual",
-      "ok": true,
-      "periodo": "2018–2025",
-      "atualizado": "2026-09-04",
-      "linhasRecebidas": 18785,
-      "linhasCasadas": 64,
-      "camposRecebidos": [
-        "noMunMinsgUf",
-        "year",
-        "state",
-        "metricFOB"
-      ]
-    },
-    {
-      "fonte": "Comex Stat",
-      "rotulo": "export — acumulado do ano corrente",
-      "ok": true,
-      "experimental": false,
-      "janela": "2026-01–2026-08",
-      "linhasRecebidas": 2412
+      "ok": false,
+      "erro": "HTTP 403 em https://api-comexstat.mdic.gov.br/cities :: <!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]--"
     },
     {
       "fonte": "Comex Stat",
       "rotulo": "import — série anual",
-      "ok": true,
-      "periodo": "2018–2025",
-      "atualizado": "2026-09-04",
-      "linhasRecebidas": 17905,
-      "linhasCasadas": 64,
-      "camposRecebidos": [
-        "noMunMinsgUf",
-        "year",
-        "state",
-        "metricFOB"
-      ]
-    },
-    {
-      "fonte": "Comex Stat",
-      "rotulo": "import — acumulado do ano corrente",
-      "ok": true,
-      "experimental": false,
-      "janela": "2026-01–2026-08",
-      "linhasRecebidas": 2404
+      "ok": false,
+      "erro": "HTTP 403 em https://api-comexstat.mdic.gov.br/cities :: <!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]--"
     },
     {
       "fonte": "Banco Central — SGS",
@@ -260,26 +230,26 @@
         "2025"
       ],
       "anosParciaisIgnorados": [
-        "2026 (7 meses)"
+        "2026 (8 meses)"
       ]
     }
   ],
   "registro": [
-    "17:21:19 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
-    "17:21:20 IBGE 6579 (Estimativas da População): 1 indicadores",
-    "17:21:20 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
-    "17:21:22 IBGE 5938 (PIB dos Municípios): 7 indicadores",
-    "17:21:23 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
-    "17:21:25 IBGE 5457 (Produção Agrícola Municipal): 4 indicadores",
-    "17:21:26 IBGE 4709 (Censo 2022 — variação e taxa de crescimento): 3 indicadores",
-    "17:21:27 IBGE 6804 (Censo 2022 — abastecimento de água): 2 indicadores",
-    "17:21:28 IBGE 6805 (Censo 2022 — esgotamento sanitário): 2 indicadores",
-    "17:21:29 IBGE 6892 (Censo 2022 — destino do lixo): 2 indicadores",
-    "17:21:30 IBGE 2612 (Nascidos vivos — Registro Civil): 1 indicadores",
-    "17:21:32 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "17:21:34 Segurança: 8 indicadores, anos 2023,2024,2025",
-    "17:21:43 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
-    "17:21:52 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "17:21:54 BCB: 5 séries"
+    "17:54:15 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
+    "17:54:15 IBGE 6579 (Estimativas da População): 1 indicadores",
+    "17:54:16 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
+    "17:54:17 IBGE 5938 (PIB dos Municípios): 7 indicadores",
+    "17:54:17 Comex export anual FALHOU: HTTP 403 em https://api-comexstat.mdic.gov.br/cities :: <!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+    "17:54:18 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
+    "17:54:19 BCB: 5 séries",
+    "17:54:20 IBGE 5457 (Produção Agrícola Municipal): 4 indicadores",
+    "17:54:21 Comex import anual FALHOU: HTTP 403 em https://api-comexstat.mdic.gov.br/cities :: <!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+    "17:54:21 IBGE 4709 (Censo 2022 — variação e taxa de crescimento): 3 indicadores",
+    "17:54:22 IBGE 6804 (Censo 2022 — abastecimento de água): 2 indicadores",
+    "17:54:24 IBGE 6805 (Censo 2022 — esgotamento sanitário): 2 indicadores",
+    "17:54:25 IBGE 6892 (Censo 2022 — destino do lixo): 2 indicadores",
+    "17:54:28 IBGE 2612 (Nascidos vivos — Registro Civil): 1 indicadores",
+    "17:54:29 Segurança: 8 indicadores, anos 2023,2024,2025",
+    "17:54:50 SICONFI: receitas 63, despesas 62, vazios 0, erros 3"
   ]
 }
