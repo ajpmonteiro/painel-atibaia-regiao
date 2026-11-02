@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-10-26T15:58:32.533Z",
+  "geradoEm": "2026-11-02T19:19:06.047Z",
   "diagnostico": [
     {
       "fonte": "IBGE 6579",
@@ -145,27 +145,27 @@
         "2025"
       ],
       "anosParciaisIgnorados": [
-        "2026 (8 meses)"
+        "2026 (9 meses)"
       ]
     }
   ],
   "registro": [
-    "15:52:28 Localidades do IBGE indisponível (fetch failed); seguindo com os códigos gravados.",
-    "15:52:28 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
-    "15:52:31 BCB: 5 séries",
-    "15:52:41 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "15:52:41 Segurança: 8 indicadores, anos 2023,2024,2025",
-    "15:52:53 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
-    "15:53:01 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "15:53:04 IBGE 6579 FALHOU: fetch failed",
-    "15:53:41 IBGE 4714 FALHOU: fetch failed",
-    "15:54:17 IBGE 5938 FALHOU: fetch failed",
-    "15:54:53 IBGE 1685 FALHOU: fetch failed",
-    "15:55:30 IBGE 5457 FALHOU: fetch failed",
-    "15:56:06 IBGE 4709 FALHOU: fetch failed",
-    "15:56:42 IBGE 6804 FALHOU: fetch failed",
-    "15:57:19 IBGE 6805 FALHOU: fetch failed",
-    "15:57:55 IBGE 6892 FALHOU: fetch failed",
-    "15:58:32 IBGE 2612 FALHOU: fetch failed"
+    "19:13:02 Localidades do IBGE indisponível (fetch failed); seguindo com os códigos gravados.",
+    "19:13:02 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
+    "19:13:06 BCB: 5 séries",
+    "19:13:14 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "19:13:18 Segurança: 8 indicadores, anos 2023,2024,2025",
+    "19:13:29 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
+    "19:13:35 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "19:13:38 IBGE 6579 FALHOU: fetch failed",
+    "19:14:14 IBGE 4714 FALHOU: fetch failed",
+    "19:14:50 IBGE 5938 FALHOU: fetch failed",
+    "19:15:27 IBGE 1685 FALHOU: fetch failed",
+    "19:16:03 IBGE 5457 FALHOU: fetch failed",
+    "19:16:40 IBGE 4709 FALHOU: fetch failed",
+    "19:17:16 IBGE 6804 FALHOU: fetch failed",
+    "19:17:52 IBGE 6805 FALHOU: fetch failed",
+    "19:18:29 IBGE 6892 FALHOU: fetch failed",
+    "19:19:05 IBGE 2612 FALHOU: fetch failed"
   ]
 }
