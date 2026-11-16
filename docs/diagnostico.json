@@ -1,65 +1,180 @@
 {
-  "geradoEm": "2026-11-09T19:36:35.273Z",
+  "geradoEm": "2026-11-16T19:16:54.358Z",
   "diagnostico": [
     {
       "fonte": "IBGE 6579",
       "rotulo": "Estimativas da População",
-      "ok": false,
-      "erro": "fetch failed"
+      "ok": true,
+      "indicadores": 1,
+      "nomeTabela": "População residente estimada",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2001,
+        "fim": 2026
+      },
+      "ms": 21263
     },
     {
       "fonte": "IBGE 4714",
       "rotulo": "Censo 2022 — população, área e densidade",
-      "ok": false,
-      "erro": "fetch failed"
+      "ok": true,
+      "indicadores": 3,
+      "nomeTabela": "População Residente, Área territorial e Densidade demográfica",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2022,
+        "fim": 2022
+      },
+      "ms": 386
     },
     {
       "fonte": "IBGE 5938",
       "rotulo": "PIB dos Municípios",
-      "ok": false,
-      "erro": "fetch failed"
+      "ok": true,
+      "indicadores": 7,
+      "nomeTabela": "Produto interno bruto a preços correntes, impostos, líquidos de subsídios, sobre produtos a preços correntes e valor adicionado bruto a preços correntes total e por atividade econômica, e respectivas participações - Referência 2010",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2002,
+        "fim": 2023
+      },
+      "ms": 20020
     },
     {
       "fonte": "IBGE 1685",
       "rotulo": "Cadastro Central de Empresas",
-      "ok": false,
-      "erro": "fetch failed"
+      "ok": true,
+      "indicadores": 8,
+      "nomeTabela": "Unidades locais, empresas e outras organizações atuantes, pessoal ocupado total, pessoal ocupado assalariado, pessoal assalariado médio, salários e outras remunerações e salário médio mensal – série encerrada em 2021",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2006,
+        "fim": 2021
+      },
+      "ms": 1403
     },
     {
       "fonte": "IBGE 5457",
       "rotulo": "Produção Agrícola Municipal",
-      "ok": false,
-      "erro": "fetch failed"
+      "ok": true,
+      "indicadores": 4,
+      "nomeTabela": "Área plantada ou destinada à colheita, área colhida, quantidade produzida, rendimento médio e valor da produção das lavouras temporárias e permanentes",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 1974,
+        "fim": 2025
+      },
+      "ms": 1275
     },
     {
       "fonte": "IBGE 4709",
       "rotulo": "Censo 2022 — variação e taxa de crescimento",
-      "ok": false,
-      "erro": "fetch failed"
+      "ok": true,
+      "indicadores": 3,
+      "nomeTabela": "População residente, Variação absoluta de população residente e Taxa de crescimento geométrico",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2022,
+        "fim": 2022
+      },
+      "ms": 403
     },
     {
       "fonte": "IBGE 6804",
       "rotulo": "Censo 2022 — abastecimento de água",
-      "ok": false,
-      "erro": "fetch failed"
+      "ok": true,
+      "indicadores": 2,
+      "nomeTabela": "Domicílios particulares permanentes ocupados, por existência de canalização de água e principal forma de abastecimento de água",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2022,
+        "fim": 2022
+      },
+      "ms": 342,
+      "classificacaoUsada": "Principal forma de abastecimento de água",
+      "categoriasVistas": [
+        "Total",
+        "Rede geral de distribuição",
+        "Poço profundo ou artesiano",
+        "Poço raso, freático ou cacimba",
+        "Fonte, nascente ou mina",
+        "Carro-pipa",
+        "Água da chuva armazenada",
+        "Rios, açudes, córregos, lagos e igarapés",
+        "Outra"
+      ],
+      "categoriasSomadas": [
+        "Rede geral de distribuição"
+      ]
     },
     {
       "fonte": "IBGE 6805",
       "rotulo": "Censo 2022 — esgotamento sanitário",
-      "ok": false,
-      "erro": "fetch failed"
+      "ok": true,
+      "indicadores": 2,
+      "nomeTabela": "Domicílios particulares permanentes ocupados, por tipo de esgotamento sanitário",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2022,
+        "fim": 2022
+      },
+      "ms": 340,
+      "classificacaoUsada": "Tipo de esgotamento sanitário",
+      "categoriasVistas": [
+        "Total",
+        "Rede geral, rede pluvial ou fossa ligada à rede",
+        "Rede geral ou pluvial",
+        "Fossa séptica ou fossa filtro ligada à rede",
+        "Fossa séptica ou fossa filtro não ligada à rede",
+        "Fossa rudimentar ou buraco",
+        "Vala",
+        "Rio, lago, córrego ou mar",
+        "Outra forma",
+        "Não tinham banheiro nem sanitário"
+      ],
+      "categoriasSomadas": [
+        "Rede geral, rede pluvial ou fossa ligada à rede"
+      ]
     },
     {
       "fonte": "IBGE 6892",
       "rotulo": "Censo 2022 — destino do lixo",
-      "ok": false,
-      "erro": "fetch failed"
+      "ok": true,
+      "indicadores": 2,
+      "nomeTabela": "Domicílios particulares permanentes ocupados, por destino do lixo",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2022,
+        "fim": 2022
+      },
+      "ms": 331,
+      "classificacaoUsada": "Destino do lixo",
+      "categoriasVistas": [
+        "Total",
+        "Coletado",
+        "Coletado no domicílio por serviço de limpeza",
+        "Depositado em caçamba de serviço de limpeza",
+        "Queimado na propriedade",
+        "Enterrado na propriedade",
+        "Jogado em terreno baldio, encosta ou área pública",
+        "Outro destino"
+      ],
+      "categoriasSomadas": [
+        "Coletado"
+      ]
     },
     {
       "fonte": "IBGE 2612",
       "rotulo": "Nascidos vivos — Registro Civil",
-      "ok": false,
-      "erro": "fetch failed"
+      "ok": true,
+      "indicadores": 1,
+      "nomeTabela": "Nascidos vivos, ocorridos no ano, por mês do nascimento, sexo, local de nascimento, número de nascidos por parto, idade da mãe na ocasião do parto e lugar de residência da mãe",
+      "periodicidade": {
+        "frequencia": "anual",
+        "inicio": 2003,
+        "fim": 2024
+      },
+      "ms": 1150
     },
     {
       "fonte": "Tesouro Nacional / SICONFI",
@@ -136,36 +251,27 @@
     },
     {
       "fonte": "SSP-SP — Secretaria da Segurança Pública de São Paulo",
-      "rotulo": "ocorrências criminais por município",
-      "ok": true,
-      "indicadores": 8,
-      "anos": [
-        "2023",
-        "2024",
-        "2025"
-      ],
-      "anosParciaisIgnorados": [
-        "2026 (9 meses)"
-      ]
+      "rotulo": "ocorrências criminais",
+      "ok": false,
+      "erro": "RecuperaMunicipios: fetch failed"
     }
   ],
   "registro": [
-    "19:30:31 Localidades do IBGE indisponível (fetch failed); seguindo com os códigos gravados.",
-    "19:30:31 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
-    "19:30:34 BCB: 5 séries",
-    "19:30:44 Segurança: 8 indicadores, anos 2023,2024,2025",
-    "19:30:47 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "19:31:01 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
-    "19:31:07 IBGE 6579 FALHOU: fetch failed",
-    "19:31:10 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
-    "19:31:43 IBGE 4714 FALHOU: fetch failed",
-    "19:32:20 IBGE 5938 FALHOU: fetch failed",
-    "19:32:56 IBGE 1685 FALHOU: fetch failed",
-    "19:33:32 IBGE 5457 FALHOU: fetch failed",
-    "19:34:09 IBGE 4709 FALHOU: fetch failed",
-    "19:34:45 IBGE 6804 FALHOU: fetch failed",
-    "19:35:22 IBGE 6805 FALHOU: fetch failed",
-    "19:35:58 IBGE 6892 FALHOU: fetch failed",
-    "19:36:34 IBGE 2612 FALHOU: fetch failed"
+    "19:16:03 Municípios: Atibaia, Bragança Paulista, Itatiba, Jarinu, Bom Jesus dos Perdões, Nazaré Paulista, Piracaia, Jundiaí",
+    "19:16:05 BCB: 5 séries",
+    "19:16:16 Comex export anual: 64 linhas casadas de 18785, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "19:16:24 IBGE 6579 (Estimativas da População): 1 indicadores",
+    "19:16:25 IBGE 4714 (Censo 2022 — população, área e densidade): 3 indicadores",
+    "19:16:29 SICONFI: receitas 64, despesas 64, vazios 0, erros 0",
+    "19:16:37 Comex import anual: 64 linhas casadas de 17905, anos 2018,2019,2020,2021,2022,2023,2024,2025",
+    "19:16:43 Segurança: lista de municípios da SSP indisponível (fetch failed)",
+    "19:16:45 IBGE 5938 (PIB dos Municípios): 7 indicadores",
+    "19:16:47 IBGE 1685 (Cadastro Central de Empresas): 8 indicadores",
+    "19:16:49 IBGE 5457 (Produção Agrícola Municipal): 4 indicadores",
+    "19:16:50 IBGE 4709 (Censo 2022 — variação e taxa de crescimento): 3 indicadores",
+    "19:16:50 IBGE 6804 (Censo 2022 — abastecimento de água): 2 indicadores",
+    "19:16:51 IBGE 6805 (Censo 2022 — esgotamento sanitário): 2 indicadores",
+    "19:16:52 IBGE 6892 (Censo 2022 — destino do lixo): 2 indicadores",
+    "19:16:53 IBGE 2612 (Nascidos vivos — Registro Civil): 1 indicadores"
   ]
 }
